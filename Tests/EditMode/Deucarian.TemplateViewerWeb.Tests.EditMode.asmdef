@@ -5,6 +5,7 @@
     "Deucarian.API",
     "Deucarian.CameraNavigation",
     "Deucarian.CommandRouting",
+    "Deucarian.Session.APIIntegration",
     "Deucarian.TemplateViewerWeb",
     "Deucarian.Theming",
     "Deucarian.UI",

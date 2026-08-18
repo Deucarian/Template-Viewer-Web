@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.13] - 2026-08-18
+
+- Composes the shared interactive token-endpoint provider from an assigned or
+  conventional Resources profile, so generated viewers receive the same
+  package-owned Refresh Token workflow without local authentication scripts.
+- Updated API, Session API Integration, Viewer Authentication, and Web Viewer
+  Suite dependencies for credential-safe endpoint acquisition.
+
 ## [0.1.12] - 2026-08-18
 
 - Declares the shared Session package and runtime assembly directly so the
