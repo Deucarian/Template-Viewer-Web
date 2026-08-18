@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.1.12] - 2026-08-18
+
+- Declares the shared Session package and runtime assembly directly so the
+  template's authentication composition compiles cleanly in consumers.
+
 ## [0.1.11] - 2026-08-18
 
 - Composed the shared Viewer Authentication session, commands, and development

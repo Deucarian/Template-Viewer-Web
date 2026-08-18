@@ -10,6 +10,7 @@
     "Deucarian.Logging",
     "Deucarian.ObjectLoading",
     "Deucarian.ObjectLoading.APIIntegration",
+    "Deucarian.Session",
     "Deucarian.Theming",
     "Deucarian.UI",
     "Deucarian.ViewerNavigation",
