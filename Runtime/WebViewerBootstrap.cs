@@ -6,6 +6,7 @@ using Deucarian.CommandRouting;
 using Deucarian.CommandRouting.WebGLIntegration;
 using Deucarian.Diagnostics;
 using Deucarian.Logging;
+using Deucarian.Session.APIIntegration;
 using Deucarian.TemplateViewerWeb.Commands;
 using Deucarian.TemplateViewerWeb.Diagnostics;
 using Deucarian.TemplateViewerWeb.Loading;
@@ -37,6 +38,11 @@ namespace Deucarian.TemplateViewerWeb
         [SerializeField] private GameObject embeddedReferenceModel;
         [SerializeField] private Transform loadedModelParent;
         [SerializeField] private ApiClientConfig apiClientConfig;
+
+        [Header("Authentication")]
+        [Tooltip("Optional credential-free token endpoint profile. When omitted, the shared Viewer Authentication Resources profile is used when present.")]
+        [SerializeField] private SessionTokenEndpointProfile
+            authenticationTokenEndpointProfile;
         [Tooltip("Additional exact HTTP(S) origins that may receive the live viewer session token for model downloads. Cross-origin URLs stay anonymous unless listed here.")]
         [SerializeField] private List<string> authenticatedModelOrigins =
             new List<string>();
@@ -56,6 +62,8 @@ namespace Deucarian.TemplateViewerWeb
         private WebViewerShellStatusAdapter shellStatusAdapter;
         private DeucarianThemeProvider referenceThemeProvider;
         private ViewerAuthenticationSession authenticationSession;
+        private IViewerAuthenticationAcquisitionProvider
+            authenticationAcquisitionProvider;
         private IDisposable authenticationTargetRegistration;
 
         public bool IframeMode => iframeMode;
@@ -83,6 +91,15 @@ namespace Deucarian.TemplateViewerWeb
             ThemeProvider?.CurrentTheme ??
             ResolvedNavigationComposition.ThemeProfile.ResolveTheme(
                 ResolvedNavigationComposition.ThemeMode);
+        public SessionTokenEndpointProfile
+            ResolvedAuthenticationTokenEndpointProfile =>
+                authenticationTokenEndpointProfile ??
+                Resources.Load<SessionTokenEndpointProfile>(
+                    ViewerAuthenticationEndpointProviderFactory
+                        .DefaultProfileResourcePath);
+        public IViewerAuthenticationAcquisitionProvider
+            AuthenticationAcquisitionProvider =>
+                authenticationAcquisitionProvider;
 
         private void Start()
         {
@@ -141,6 +158,7 @@ namespace Deucarian.TemplateViewerWeb
         {
             authenticationTargetRegistration?.Dispose();
             authenticationTargetRegistration = null;
+            authenticationAcquisitionProvider = null;
             shellStatusAdapter?.Dispose();
             shellStatusAdapter = null;
             commandBridge?.Dispose();
@@ -176,14 +194,17 @@ namespace Deucarian.TemplateViewerWeb
             navigation.BeginReferenceLoad();
 
             authenticationSession = new ViewerAuthenticationSession();
+            IApiClient apiClient = ApiClientFactory.Create(
+                apiClientConfig,
+                authenticationSession.ApiAuthProvider);
+            authenticationAcquisitionProvider =
+                CreateAuthenticationAcquisitionProvider(apiClient);
             authenticationTargetRegistration =
                 ViewerAuthenticationTargetRegistry.Register(
                     "web-viewer-" + GetInstanceID(),
                     "Web Viewer",
-                    authenticationSession);
-            IApiClient apiClient = ApiClientFactory.Create(
-                apiClientConfig,
-                authenticationSession.ApiAuthProvider);
+                    authenticationSession,
+                    authenticationAcquisitionProvider);
             modelLoader = new ObjectLoadingWebViewerModelLoader(
                 this,
                 apiClient,
@@ -243,6 +264,18 @@ namespace Deucarian.TemplateViewerWeb
                 application,
                 shell);
             commandBridge.Start();
+        }
+
+        private IViewerAuthenticationAcquisitionProvider
+            CreateAuthenticationAcquisitionProvider(IApiClient apiClient)
+        {
+            SessionTokenEndpointProfile profile =
+                ResolvedAuthenticationTokenEndpointProfile;
+            return profile == null
+                ? null
+                : ViewerAuthenticationEndpointProviderFactory.Create(
+                    profile,
+                    apiClient);
         }
 
         private ViewerRenderingInstaller InstallRendering()

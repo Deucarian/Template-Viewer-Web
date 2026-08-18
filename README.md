@@ -27,7 +27,8 @@ of copying a viewer application:
 - API, Object Loading, and their integration load AssetBundle content;
 - Viewer Authentication composes Session with the live API auth provider,
   standard update/refresh/clear commands, sanitized status, and the shared
-  development authentication menu;
+  development authentication menu; Session API Integration supplies the
+  credential-free endpoint profile and response mapping used by that menu;
 - Diagnostics reports sanitized lifecycle, revision, and element counts; and
 - Build Pipeline owns the shared policy while this template supplies the
   project-specific development/production provider and profiles.
@@ -52,9 +53,13 @@ For an authenticated development session, open **Tools > Deucarian > Viewer >
 Authentication**. Paste/replace input is masked and cleared immediately. An
 optional remembered token is stored only in this Unity project's local
 `UserSettings`, not in the template package or a versioned ScriptableObject.
-The same window can refresh when the application supplied a real backend
-refresh adapter, and shows a Get/Sign In action when a backend-specific token
-acquisition provider is registered.
+Assign a credential-free `SessionTokenEndpointProfile` on `WebViewerBootstrap`,
+or place one at Resources path
+`Deucarian/ViewerAuthenticationTokenEndpointProfile`. The shared window then
+renders its transient fields and offers **Refresh Token**, which reacquires a
+token through the configured endpoint. Credentials remain window-local and the
+profile stores only request/response shape. A true automatic refresh service is
+still a separate optional capability.
 
 ## Commands
 
@@ -157,8 +162,8 @@ Build Pipeline excludes development diagnostics and development-context files.
 - replace the example `WebViewerElement` index/controller with a domain-owned
   visibility capability;
 - add application commands through Command Routing handlers, not the transport.
-- implement the Viewer Authentication acquisition provider in a
-  backend-specific package when the shared menu should offer Get/Sign In.
+- define a credential-free Session API token endpoint profile when the shared
+  Authentication menu should offer endpoint-backed Refresh Token.
 
 ## Validation
 

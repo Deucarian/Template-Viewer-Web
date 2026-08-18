@@ -11,6 +11,7 @@
     "Deucarian.ObjectLoading",
     "Deucarian.ObjectLoading.APIIntegration",
     "Deucarian.Session",
+    "Deucarian.Session.APIIntegration",
     "Deucarian.Theming",
     "Deucarian.UI",
     "Deucarian.ViewerNavigation",
