@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.14] - 2026-08-18
+
+- Updated Session API Integration to 1.1.1, Viewer Authentication to 0.3.0,
+  and Web Viewer Suite to 0.1.12 so generated viewers receive the shared Edit
+  Mode authentication workspace and optional server-side token validation.
+
 ## [0.1.13] - 2026-08-18
 
 - Composes the shared interactive token-endpoint provider from an assigned or
