@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.15] - 2026-08-19
+
+- Updated Viewer Authentication to 0.3.1 and Web Viewer Suite to 0.1.13 so
+  generated viewers clearly show developers which authentication endpoint and
+  environment the shared authentication menu targets.
+
 ## [0.1.14] - 2026-08-18
 
 - Updated Session API Integration to 1.1.1, Viewer Authentication to 0.3.0,
