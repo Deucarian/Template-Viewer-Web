@@ -3,19 +3,23 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Deucarian.TemplateViewerWeb.Selection;
+using Deucarian.ViewerAuthentication;
 using Deucarian.ViewerNavigation;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
 
 namespace Deucarian.TemplateViewerWeb
 {
-    public sealed class WebViewerApplication : IDisposable
+    public sealed class WebViewerApplication :
+        IDisposable,
+        IViewerAuthenticationHost
     {
         private readonly IWebViewerModelDescriptorResolver descriptorResolver;
         private readonly IWebViewerModelLoader modelLoader;
         private readonly ViewerNavigationInstaller navigation;
         private readonly IWebViewerEventPublisher eventPublisher;
         private readonly GameObject embeddedModel;
+        private readonly IViewerAuthenticationSession authenticationSession;
         private CancellationTokenSource initializationCancellation;
         private WebViewerSelectionStateOwner selection;
         private int initializationGeneration;
@@ -27,7 +31,8 @@ namespace Deucarian.TemplateViewerWeb
             IWebViewerModelLoader loader,
             ViewerNavigationInstaller navigationInstaller,
             IWebViewerEventPublisher publisher,
-            GameObject embeddedReferenceModel = null)
+            GameObject embeddedReferenceModel = null,
+            IViewerAuthenticationSession viewerAuthentication = null)
         {
             descriptorResolver = resolver ??
                 throw new ArgumentNullException(nameof(resolver));
@@ -36,6 +41,8 @@ namespace Deucarian.TemplateViewerWeb
                 throw new ArgumentNullException(nameof(navigationInstaller));
             eventPublisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
             embeddedModel = embeddedReferenceModel;
+            authenticationSession = viewerAuthentication ??
+                new ViewerAuthenticationSession();
             Lifecycle = WebViewerLifecycleState.Created;
             if (embeddedModel != null)
             {
@@ -50,6 +57,8 @@ namespace Deucarian.TemplateViewerWeb
         public long LatestRevision => Interlocked.Read(ref latestRevision);
         public int IndexedElementCount { get; private set; }
         public int SelectedElementCount => selection?.SelectedIds.Count ?? 0;
+        public IViewerAuthenticationSession AuthenticationSession =>
+            authenticationSession;
 
         public async Task<CommandOperationResult> InitializeAsync(
             WebViewerInitializeRequest request,

@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Deucarian.API.Core;
+using Deucarian.API.Models;
 using Deucarian.ObjectLoading;
 using Deucarian.ObjectLoading.APIIntegration;
 using UnityEngine;
@@ -14,6 +16,8 @@ namespace Deucarian.TemplateViewerWeb.Loading
         private readonly MonoBehaviour coroutineOwner;
         private readonly IApiClient apiClient;
         private readonly Transform modelParent;
+        private readonly string apiBaseUrl;
+        private readonly IReadOnlyCollection<string> authenticatedModelOrigins;
         private ObjectLoadingPipeline activePipeline;
         private CancellationTokenSource activeCancellation;
         private int generation;
@@ -23,10 +27,24 @@ namespace Deucarian.TemplateViewerWeb.Loading
             MonoBehaviour owner,
             IApiClient client,
             Transform parent)
+            : this(owner, client, parent, null, null)
+        {
+        }
+
+        public ObjectLoadingWebViewerModelLoader(
+            MonoBehaviour owner,
+            IApiClient client,
+            Transform parent,
+            string configuredApiBaseUrl,
+            IEnumerable<string> additionalAuthenticatedOrigins)
         {
             coroutineOwner = owner ?? throw new ArgumentNullException(nameof(owner));
             apiClient = client ?? throw new ArgumentNullException(nameof(client));
             modelParent = parent ?? throw new ArgumentNullException(nameof(parent));
+            apiBaseUrl = configuredApiBaseUrl;
+            authenticatedModelOrigins = additionalAuthenticatedOrigins == null
+                ? Array.Empty<string>()
+                : new List<string>(additionalAuthenticatedOrigins);
         }
 
         public event Action<float, string> ProgressChanged;
@@ -47,8 +65,15 @@ namespace Deucarian.TemplateViewerWeb.Loading
             activeCancellation = CancellationTokenSource.CreateLinkedTokenSource(
                 cancellationToken);
             CancellationToken token = activeCancellation.Token;
+            ApiAuthenticationRequirement providerAuthentication =
+                WebViewerModelAuthenticationPolicy.Resolve(
+                    descriptor.SourceUrl,
+                    apiBaseUrl,
+                    authenticatedModelOrigins);
             ObjectLoadingPipeline pipeline =
-                ApiObjectLoadingPipelineFactory.Create(apiClient);
+                ApiObjectLoadingPipelineFactory.Create(
+                    apiClient,
+                    providerAuthentication);
             var completion = new TaskCompletionSource<WebViewerModelLoadResult>();
 
             ObjectLoadRequest request = ObjectLoadRequest.FromUrl(descriptor.SourceUrl);

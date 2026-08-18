@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Deucarian.API.Configuration;
 using Deucarian.API.Core;
 using Deucarian.CommandRouting;
@@ -10,6 +11,7 @@ using Deucarian.TemplateViewerWeb.Diagnostics;
 using Deucarian.TemplateViewerWeb.Loading;
 using Deucarian.TemplateViewerWeb.Selection;
 using Deucarian.Theming;
+using Deucarian.ViewerAuthentication;
 using Deucarian.ViewerNavigation;
 using Deucarian.ViewerNavigation.UI;
 using Deucarian.ViewerRendering;
@@ -35,6 +37,9 @@ namespace Deucarian.TemplateViewerWeb
         [SerializeField] private GameObject embeddedReferenceModel;
         [SerializeField] private Transform loadedModelParent;
         [SerializeField] private ApiClientConfig apiClientConfig;
+        [Tooltip("Additional exact HTTP(S) origins that may receive the live viewer session token for model downloads. Cross-origin URLs stay anonymous unless listed here.")]
+        [SerializeField] private List<string> authenticatedModelOrigins =
+            new List<string>();
         private ViewerNavigationReferenceCompositionProfile _navigationComposition;
         private bool _hasResolvedNavigationComposition;
         private ViewerRenderingReferenceCompositionProfile _renderingComposition;
@@ -50,6 +55,8 @@ namespace Deucarian.TemplateViewerWeb
         private ViewerShellPresenter shellPresenter;
         private WebViewerShellStatusAdapter shellStatusAdapter;
         private DeucarianThemeProvider referenceThemeProvider;
+        private ViewerAuthenticationSession authenticationSession;
+        private IDisposable authenticationTargetRegistration;
 
         public bool IframeMode => iframeMode;
         public string ParentOrigin => parentOrigin;
@@ -132,6 +139,8 @@ namespace Deucarian.TemplateViewerWeb
 
         private void OnDestroy()
         {
+            authenticationTargetRegistration?.Dispose();
+            authenticationTargetRegistration = null;
             shellStatusAdapter?.Dispose();
             shellStatusAdapter = null;
             commandBridge?.Dispose();
@@ -166,11 +175,21 @@ namespace Deucarian.TemplateViewerWeb
 
             navigation.BeginReferenceLoad();
 
-            IApiClient apiClient = ApiClientFactory.Create(apiClientConfig);
+            authenticationSession = new ViewerAuthenticationSession();
+            authenticationTargetRegistration =
+                ViewerAuthenticationTargetRegistry.Register(
+                    "web-viewer-" + GetInstanceID(),
+                    "Web Viewer",
+                    authenticationSession);
+            IApiClient apiClient = ApiClientFactory.Create(
+                apiClientConfig,
+                authenticationSession.ApiAuthProvider);
             modelLoader = new ObjectLoadingWebViewerModelLoader(
                 this,
                 apiClient,
-                loadedModelParent);
+                loadedModelParent,
+                apiClientConfig != null ? apiClientConfig.BaseUrl : null,
+                authenticatedModelOrigins);
             modelLoader.ProgressChanged += OnModelLoadingProgress;
 
             WebGlCommandTransportMode mode = iframeMode
@@ -189,15 +208,26 @@ namespace Deucarian.TemplateViewerWeb
                 gameObject.AddComponent<WebGlCommandTransportBehaviour>();
             behaviour.Initialize(transport);
 
+            string browserEndpoint = iframeMode
+                ? "parent:" + transportOptions.TargetOrigin
+                : "direct";
+            var eventPublisher =
+                new WebGlWebViewerEventPublisher(transport);
+            var authenticationEventPublisher =
+                new WebViewerAuthenticationEventPublisher(
+                    eventPublisher,
+                    browserEndpoint);
+
             application = new WebViewerApplication(
                 new DirectWebViewerModelDescriptorResolver(),
                 modelLoader,
                 navigation,
-                new WebGlWebViewerEventPublisher(transport),
-                embeddedReferenceModel);
+                eventPublisher,
+                embeddedReferenceModel,
+                authenticationSession);
             commandRuntime = new CommandRoutingRuntime<WebViewerApplication>(
                 application,
-                WebViewerCommandHandlers.Create(),
+                WebViewerCommandHandlers.Create(authenticationEventPublisher),
                 new CommandRoutingOptions(
                     historyCapacity: 64,
                     logSuccessfulCommands: false,

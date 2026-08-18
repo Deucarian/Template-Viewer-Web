@@ -25,6 +25,9 @@ of copying a viewer application:
 - Command Routing and its WebGL Integration supply canonical envelopes,
   direct-page and secure iframe transport, ready handshake, and cleanup;
 - API, Object Loading, and their integration load AssetBundle content;
+- Viewer Authentication composes Session with the live API auth provider,
+  standard update/refresh/clear commands, sanitized status, and the shared
+  development authentication menu;
 - Diagnostics reports sanitized lifecycle, revision, and element counts; and
 - Build Pipeline owns the shared policy while this template supplies the
   project-specific development/production provider and profiles.
@@ -44,6 +47,14 @@ instead supply an HTTP(S) or API-relative `model_url`. Replace
 `IWebViewerModelDescriptorResolver` in the composition root when an application
 must resolve a project/model/version context. Do not put backend DTOs in this
 template.
+
+For an authenticated development session, open **Tools > Deucarian > Viewer >
+Authentication**. Paste/replace input is masked and cleared immediately. An
+optional remembered token is stored only in this Unity project's local
+`UserSettings`, not in the template package or a versioned ScriptableObject.
+The same window can refresh when the application supplied a real backend
+refresh adapter, and shows a Get/Sign In action when a backend-specific token
+acquisition provider is registered.
 
 ## Commands
 
@@ -66,9 +77,18 @@ Supported generic commands:
 - `select_elements`: `revision` and one or more stable `element_ids`;
 - `clear_selection`: `revision`, restoring the captured visibility baseline;
 - `dispose_viewer`: `revision`, unloading the model and cancelling work.
+- `update_access_token`: `access_token` and optional UTC expiry, replacing the
+  live viewer session without reconstructing API clients;
+- `updateaccesstoken`: compatibility alias for existing viewer hosts;
+- `refresh_access_token`: asks the configured Session refresh adapter for a
+  new token;
+- `clear_access_token`: clears the active viewer session.
 
 The browser receives `viewer_loading`, application-level `viewer_ready`,
-`viewer_failed`, `selection_applied`, and `viewer_disposed` events. Transport
+`viewer_failed`, `selection_applied`, `viewer_disposed`, and sanitized
+`access_token_updated`, `access_token_refreshed`, and `access_token_cleared`
+events. Authentication events contain lifecycle status only and never include
+the access token. Transport
 readiness only means listeners are installed; `viewer_ready` is emitted after
 model loading, identifier indexing, and navigation reference/origin capture.
 
@@ -115,6 +135,11 @@ allowed and target origin, validates the parent source window, and never sends
 to `*`. Production validation additionally requires a non-loopback HTTPS origin.
 The host owns the Unity instance and disposes its listeners on teardown.
 
+Model downloads use the live session provider only for API-relative URLs,
+URLs on the configured API origin, or exact additional origins explicitly
+allowlisted on `WebViewerBootstrap`. Other cross-origin URLs are deliberately
+anonymous so a host-supplied URL cannot receive the viewer credential.
+
 ## Build profiles
 
 `WebViewerBuildManagerProvider` is discovered by Deucarian Build Pipeline. Its
@@ -132,6 +157,8 @@ Build Pipeline excludes development diagnostics and development-context files.
 - replace the example `WebViewerElement` index/controller with a domain-owned
   visibility capability;
 - add application commands through Command Routing handlers, not the transport.
+- implement the Viewer Authentication acquisition provider in a
+  backend-specific package when the shared menu should offer Get/Sign In.
 
 ## Validation
 

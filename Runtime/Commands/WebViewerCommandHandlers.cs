@@ -2,19 +2,23 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Deucarian.CommandRouting;
+using Deucarian.ViewerAuthentication;
 
 namespace Deucarian.TemplateViewerWeb.Commands
 {
     public static class WebViewerCommandHandlers
     {
-        public static IReadOnlyList<ICommandHandler<WebViewerApplication>> Create()
+        public static IReadOnlyList<ICommandHandler<WebViewerApplication>> Create(
+            IViewerAuthenticationEventPublisher authenticationEventPublisher = null)
         {
             return new ICommandHandler<WebViewerApplication>[]
             {
                 new InitializeWebViewerCommandHandler(),
                 new SelectWebViewerElementsCommandHandler(),
                 new ClearWebViewerSelectionCommandHandler(),
-                new DisposeWebViewerCommandHandler()
+                new DisposeWebViewerCommandHandler(),
+                new ViewerAuthenticationCommandHandler<WebViewerApplication>(
+                    authenticationEventPublisher)
             };
         }
     }

@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.1.11] - 2026-08-18
+
+- Composed the shared Viewer Authentication session, commands, and development
+  tooling so generated viewers inherit the same live token workflow.
+- Published authentication command outcomes through the template's existing
+  browser event channel using token-free lifecycle snapshots.
+- Routed trusted model downloads through the live API authentication provider
+  without copying bearer tokens into model descriptors or diagnostics.
+
 ## [0.1.10] - 2026-08-18
 
 - Replaced the template-local status presentation with the reusable reference
