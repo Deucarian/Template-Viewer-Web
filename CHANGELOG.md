@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.16] - 2026-08-19
+
+- Updated Viewer Authentication to 0.4.0 and Web Viewer Suite to 0.1.14 so
+  generated viewers inherit the same minimalist connection workspace, exact
+  viewer-bound token storage, and stale-operation safeguards as the reference
+  viewers.
+
 ## [0.1.15] - 2026-08-19
 
 - Updated Viewer Authentication to 0.3.1 and Web Viewer Suite to 0.1.13 so
