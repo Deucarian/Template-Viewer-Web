@@ -75,6 +75,11 @@ All commands use the canonical Command Routing envelope:
 }
 ```
 
+The composition root also injects its runtime into Command Routing's
+scene-owned local ingress. Optional editor connection packages can therefore
+send this exact envelope during Play Mode without depending on the template's
+application types or bypassing command handlers.
+
 Supported generic commands:
 
 - `initialize_viewer`: `revision`, optional `model_url`, `model_id`,
