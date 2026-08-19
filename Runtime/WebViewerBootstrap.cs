@@ -54,6 +54,7 @@ namespace Deucarian.TemplateViewerWeb
         private ObjectLoadingWebViewerModelLoader modelLoader;
         private WebViewerApplication application;
         private CommandRoutingRuntime<WebViewerApplication> commandRuntime;
+        private CommandRoutePortBehaviour localCommandPort;
         private CommandTransportBridge<WebViewerApplication> commandBridge;
         private DiagnosticProviderRegistration diagnosticRegistration;
         private ViewerNavigationInstaller navigationInstaller;
@@ -100,6 +101,7 @@ namespace Deucarian.TemplateViewerWeb
         public IViewerAuthenticationAcquisitionProvider
             AuthenticationAcquisitionProvider =>
                 authenticationAcquisitionProvider;
+        public CommandRoutePortBehaviour LocalCommandPort => localCommandPort;
 
         private void Start()
         {
@@ -163,6 +165,8 @@ namespace Deucarian.TemplateViewerWeb
             shellStatusAdapter = null;
             commandBridge?.Dispose();
             commandBridge = null;
+            localCommandPort?.Clear(commandRuntime);
+            localCommandPort = null;
             application?.Dispose();
             application = null;
             commandRuntime?.Dispose();
@@ -253,6 +257,10 @@ namespace Deucarian.TemplateViewerWeb
                     historyCapacity: 64,
                     logSuccessfulCommands: false,
                     logFailedCommands: true));
+            localCommandPort =
+                GetComponent<CommandRoutePortBehaviour>() ??
+                gameObject.AddComponent<CommandRoutePortBehaviour>();
+            localCommandPort.Initialize(commandRuntime);
             commandBridge = new CommandTransportBridge<WebViewerApplication>(
                 commandRuntime,
                 transport,

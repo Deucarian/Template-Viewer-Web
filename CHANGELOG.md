@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.17] - 2026-08-19
+
+### Added
+
+- Exposed the composed viewer command runtime through Command Routing's
+  injected scene ingress, allowing optional development connections to submit
+  the canonical `initialize_viewer` envelope without template internals.
+
+### Changed
+
+- Updated the generic API and Command Routing dependencies for environment
+  catalogs and local command ingress.
+
 ## [0.1.16] - 2026-08-19
 
 - Updated Viewer Authentication to 0.4.0 and Web Viewer Suite to 0.1.14 so
