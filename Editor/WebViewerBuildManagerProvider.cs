@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Deucarian.BuildPipeline;
+using Deucarian.WebGLTemplate.Editor;
 using UnityEditor;
 using UnityEditor.Build.Profile;
 using UnityEditor.SceneManagement;
@@ -49,6 +50,7 @@ namespace Deucarian.TemplateViewerWeb.Editor
 
         public void Synchronize()
         {
+            DeucarianWebGLTemplate.Synchronize();
             EnsureScene(
                 DevelopmentScenePath,
                 iframeMode: true,
@@ -88,7 +90,7 @@ namespace Deucarian.TemplateViewerWeb.Editor
                         environment,
                         invocation.OutputPath,
                         invocation.AdditionalBuildOptions)),
-                () => ValidateScene(scenePath, environment));
+                () => ValidateScene(profilePath, scenePath, environment));
         }
 
         private static void SynchronizeProfile(
@@ -103,6 +105,7 @@ namespace Deucarian.TemplateViewerWeb.Editor
                 profile,
                 new EditorBuildSettingsScene(scenePath, true));
             DeucarianBuildRunner.ApplyPolicy(profile, environment);
+            DeucarianWebGLTemplate.ApplyTo(profile);
         }
 
         private static void EnsureScene(
@@ -137,10 +140,14 @@ namespace Deucarian.TemplateViewerWeb.Editor
         }
 
         private static DeucarianBuildValidationResult ValidateScene(
+            string profilePath,
             string scenePath,
             DeucarianBuildEnvironment environment)
         {
             var result = new DeucarianBuildValidationResult();
+            BuildProfile profile =
+                AssetDatabase.LoadAssetAtPath<BuildProfile>(profilePath);
+            result.AddRange(DeucarianWebGLTemplate.Validate(profile).Issues);
             if (AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath) == null)
             {
                 result.Add("The project-owned viewer scene is missing: " + scenePath + ".");

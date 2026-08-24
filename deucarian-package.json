@@ -36,6 +36,7 @@
     "com.deucarian.viewer-shell",
     "com.deucarian.viewer-authentication",
     "com.deucarian.web-viewer-suite",
+    "com.deucarian.webgl-template",
     "com.unity.nuget.newtonsoft-json",
     "com.unity.modules.uielements"
   ],

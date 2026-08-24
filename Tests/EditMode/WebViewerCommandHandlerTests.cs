@@ -46,6 +46,20 @@ namespace Deucarian.TemplateViewerWeb.Tests
         }
 
         [Test]
+        public void ProductVisibilityCanReplaceGenericSelectionCommands()
+        {
+            string[] names = WebViewerCommandHandlers.Create(
+                    includeGenericVisibilityCommands: false)
+                .SelectMany(handler => handler.CommandNames)
+                .ToArray();
+
+            Assert.That(names, Does.Not.Contain("select_elements"));
+            Assert.That(names, Does.Not.Contain("clear_selection"));
+            Assert.That(names, Does.Contain("initialize_viewer"));
+            Assert.That(names, Does.Contain("dispose_viewer"));
+        }
+
+        [Test]
         public async Task AuthenticationOutcomesUseTheExistingSanitizedPublisher()
         {
             var publisher = new RecordingEventPublisher();

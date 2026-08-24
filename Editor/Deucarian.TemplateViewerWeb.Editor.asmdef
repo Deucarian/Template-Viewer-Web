@@ -3,6 +3,7 @@
   "rootNamespace": "Deucarian.TemplateViewerWeb.Editor",
   "references": [
     "Deucarian.BuildPipeline.Editor",
+    "Deucarian.WebGLTemplate.Editor",
     "Deucarian.TemplateViewerWeb"
   ],
   "includePlatforms": [

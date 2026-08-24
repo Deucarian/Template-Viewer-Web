@@ -20,7 +20,10 @@ namespace Deucarian.TemplateViewerWeb
         private readonly IWebViewerEventPublisher eventPublisher;
         private readonly GameObject embeddedModel;
         private readonly IViewerAuthenticationSession authenticationSession;
+        private readonly IWebViewerVisibilityFeatureFactory
+            visibilityFeatureFactory;
         private CancellationTokenSource initializationCancellation;
+        private IWebViewerVisibilityFeature visibilityFeature;
         private WebViewerSelectionStateOwner selection;
         private int initializationGeneration;
         private long latestRevision = -1;
@@ -32,7 +35,8 @@ namespace Deucarian.TemplateViewerWeb
             ViewerNavigationInstaller navigationInstaller,
             IWebViewerEventPublisher publisher,
             GameObject embeddedReferenceModel = null,
-            IViewerAuthenticationSession viewerAuthentication = null)
+            IViewerAuthenticationSession viewerAuthentication = null,
+            IWebViewerVisibilityFeatureFactory customVisibilityFeatureFactory = null)
         {
             descriptorResolver = resolver ??
                 throw new ArgumentNullException(nameof(resolver));
@@ -43,6 +47,7 @@ namespace Deucarian.TemplateViewerWeb
             embeddedModel = embeddedReferenceModel;
             authenticationSession = viewerAuthentication ??
                 new ViewerAuthenticationSession();
+            visibilityFeatureFactory = customVisibilityFeatureFactory;
             Lifecycle = WebViewerLifecycleState.Created;
             if (embeddedModel != null)
             {
@@ -52,11 +57,16 @@ namespace Deucarian.TemplateViewerWeb
 
         public event Action<WebViewerLifecycleState> LifecycleChanged;
         public event Action<float, string> LoadingProgressChanged;
+        public event Action<WebViewerModelContext> ModelReady;
+        public event Action<WebViewerModelContext> ModelUnloading;
 
         public WebViewerLifecycleState Lifecycle { get; private set; }
         public long LatestRevision => Interlocked.Read(ref latestRevision);
-        public int IndexedElementCount { get; private set; }
-        public int SelectedElementCount => selection?.SelectedIds.Count ?? 0;
+        public int IndexedElementCount =>
+            visibilityFeature?.IndexedElementCount ?? 0;
+        public int SelectedElementCount =>
+            visibilityFeature?.SelectedElementCount ?? 0;
+        public WebViewerModelContext CurrentModel { get; private set; }
         public IViewerAuthenticationSession AuthenticationSession =>
             authenticationSession;
 
@@ -149,14 +159,18 @@ namespace Deucarian.TemplateViewerWeb
                         token);
                 }
 
-                if (!WebViewerElementIndex.TryCreate(
-                        referenceRoot,
-                        out WebViewerElementIndex index,
-                        out string indexError))
+                var modelContext = new WebViewerModelContext(
+                    referenceRoot,
+                    descriptor,
+                    request.Revision);
+                if (!TryCreateVisibilityFeature(
+                        modelContext,
+                        out IWebViewerVisibilityFeature createdFeature,
+                        out string featureError))
                 {
                     return await FailInitializationAsync(
                         request.Revision,
-                        indexError,
+                        featureError,
                         remoteEndpoint,
                         generation,
                         token);
@@ -167,9 +181,9 @@ namespace Deucarian.TemplateViewerWeb
                     return SupersededInitialization();
                 }
 
-                var visibility = new WebViewerVisibilityController(index);
-                selection = new WebViewerSelectionStateOwner(request.Revision, visibility);
-                IndexedElementCount = index.Count;
+                visibilityFeature = createdFeature;
+                selection = (createdFeature as GenericWebViewerVisibilityFeature)
+                    ?.Selection;
                 if (!navigation.RegisterReference(referenceRoot, true, true))
                 {
                     return await FailInitializationAsync(
@@ -186,6 +200,8 @@ namespace Deucarian.TemplateViewerWeb
                 }
 
                 SetLifecycle(WebViewerLifecycleState.Ready);
+                CurrentModel = modelContext;
+                NotifyModelReady(modelContext);
                 await eventPublisher.PublishAsync(
                     "viewer_ready",
                     new JObject
@@ -392,6 +408,9 @@ namespace Deucarian.TemplateViewerWeb
             }
         }
 
+        public bool TryRecordRevision(long revision) =>
+            TryAdvanceRevision(revision);
+
         private static CommandOperationResult SupersededInitialization() =>
             CommandOperationResult.Failure(
                 "superseded",
@@ -443,8 +462,16 @@ namespace Deucarian.TemplateViewerWeb
 
         private void ResetCurrentModel()
         {
+            WebViewerModelContext model = CurrentModel;
+            CurrentModel = null;
+            if (model != null)
+            {
+                NotifyModelUnloading(model);
+            }
+
+            visibilityFeature?.Dispose();
+            visibilityFeature = null;
             selection = null;
-            IndexedElementCount = 0;
             modelLoader.Unload();
             if (embeddedModel != null)
             {
@@ -482,8 +509,16 @@ namespace Deucarian.TemplateViewerWeb
             disposed = true;
             Interlocked.Increment(ref initializationGeneration);
             CancelInitialization();
+            WebViewerModelContext model = CurrentModel;
+            CurrentModel = null;
+            if (model != null)
+            {
+                NotifyModelUnloading(model);
+            }
+
+            visibilityFeature?.Dispose();
+            visibilityFeature = null;
             selection = null;
-            IndexedElementCount = 0;
             modelLoader.Unload();
             if (embeddedModel != null)
             {
@@ -493,6 +528,82 @@ namespace Deucarian.TemplateViewerWeb
             navigation.BeginReferenceLoad();
             modelLoader.Dispose();
             SetLifecycle(WebViewerLifecycleState.Disposed);
+        }
+
+        private bool TryCreateVisibilityFeature(
+            WebViewerModelContext context,
+            out IWebViewerVisibilityFeature feature,
+            out string error)
+        {
+            if (visibilityFeatureFactory != null)
+            {
+                if (!visibilityFeatureFactory.TryCreate(
+                        context,
+                        out feature,
+                        out error))
+                {
+                    feature?.Dispose();
+                    feature = null;
+                    error = string.IsNullOrWhiteSpace(error)
+                        ? "The custom visibility feature could not be created."
+                        : error.Trim();
+                    return false;
+                }
+
+                if (feature == null)
+                {
+                    error = "The custom visibility factory returned no feature.";
+                    return false;
+                }
+
+                error = string.Empty;
+                return true;
+            }
+
+            if (!GenericWebViewerVisibilityFeature.TryCreate(
+                    context,
+                    out GenericWebViewerVisibilityFeature genericFeature,
+                    out error))
+            {
+                feature = null;
+                return false;
+            }
+
+            feature = genericFeature;
+            return true;
+        }
+
+        private void NotifyModelReady(WebViewerModelContext context)
+        {
+            InvokeModelEvent(ModelReady, context);
+        }
+
+        private void NotifyModelUnloading(WebViewerModelContext context)
+        {
+            InvokeModelEvent(ModelUnloading, context);
+        }
+
+        private static void InvokeModelEvent(
+            Action<WebViewerModelContext> handlers,
+            WebViewerModelContext context)
+        {
+            if (handlers == null)
+            {
+                return;
+            }
+
+            foreach (Action<WebViewerModelContext> handler in
+                     handlers.GetInvocationList())
+            {
+                try
+                {
+                    handler(context);
+                }
+                catch (Exception)
+                {
+                    // Product observers cannot invalidate the core model lifecycle.
+                }
+            }
         }
     }
 }

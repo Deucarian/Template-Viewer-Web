@@ -1,5 +1,6 @@
 using System;
 using Deucarian.ViewerShell;
+using Deucarian.WebGLTemplate;
 using UnityEngine;
 
 namespace Deucarian.TemplateViewerWeb
@@ -47,27 +48,42 @@ namespace Deucarian.TemplateViewerWeb
             switch (lifecycle)
             {
                 case WebViewerLifecycleState.Created:
+                    DeucarianWebGLShell.ReportState(
+                        DeucarianWebGLShellState.Loading,
+                        "Waiting for browser host");
                     Apply(ViewerShellStatusSnapshot.Uninitialized(
                         "Waiting for browser host",
                         diagnostics));
                     break;
                 case WebViewerLifecycleState.Loading:
+                    DeucarianWebGLShell.ReportState(
+                        DeucarianWebGLShellState.Loading,
+                        "Loading model");
                     Apply(ViewerShellStatusSnapshot.Loading(
                         "Loading model\u2026",
                         diagnostics));
                     break;
                 case WebViewerLifecycleState.Ready:
+                    DeucarianWebGLShell.ReportState(
+                        DeucarianWebGLShellState.Ready,
+                        "Viewer ready");
                     Apply(ViewerShellStatusSnapshot.Ready(
                         "Ready \u2022 " + application.IndexedElementCount +
                         " elements",
                         diagnostics));
                     break;
                 case WebViewerLifecycleState.Failed:
+                    DeucarianWebGLShell.ReportState(
+                        DeucarianWebGLShellState.Failed,
+                        "Viewer initialization failed");
                     Apply(ViewerShellStatusSnapshot.Error(
                         "Viewer initialization failed",
                         diagnostics));
                     break;
                 case WebViewerLifecycleState.Disposed:
+                    DeucarianWebGLShell.ReportState(
+                        DeucarianWebGLShellState.Disposed,
+                        "Viewer disposed");
                     Apply(ViewerShellStatusSnapshot.Uninitialized(
                         "Viewer disposed",
                         diagnostics));
@@ -84,6 +100,10 @@ namespace Deucarian.TemplateViewerWeb
                 label + " \u2022 " +
                 Mathf.RoundToInt(Mathf.Clamp01(normalized) * 100f) + "%",
                 FormatDiagnostics()));
+            DeucarianWebGLShell.ReportProgress(
+                "model",
+                normalized,
+                label);
         }
 
         private void Apply(ViewerShellStatusSnapshot snapshot)

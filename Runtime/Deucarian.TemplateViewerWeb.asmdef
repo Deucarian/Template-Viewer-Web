@@ -18,6 +18,7 @@
     "Deucarian.ViewerRendering",
     "Deucarian.ViewerShell",
     "Deucarian.ViewerAuthentication",
+    "Deucarian.WebGLTemplate",
     "Newtonsoft.Json",
     "UnityEngine.UIElementsModule"
   ],

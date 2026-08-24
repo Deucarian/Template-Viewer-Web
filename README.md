@@ -31,7 +31,15 @@ of copying a viewer application:
   credential-free endpoint profile and response mapping used by that menu;
 - Diagnostics reports sanitized lifecycle, revision, and element counts; and
 - Build Pipeline owns the shared policy while this template supplies the
-  project-specific development/production provider and profiles.
+  project-specific development/production provider and profiles; and
+- WebGL Template supplies the browser page, loading/ready/failure states, and
+  lifecycle bridge shared by browser-hosted viewers.
+
+Product packages may add `WebViewerFeatureBehaviour` components beside the
+bootstrap. They can contribute commands and one replaceable visibility owner.
+When a product owns visibility, the generic `select_elements` controller is not
+created, so two systems never compete over model active states. Model loading,
+navigation, camera state, browser transport, and shell behavior stay shared.
 
 ## Quick start
 

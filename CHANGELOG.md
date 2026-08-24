@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.0] - 2026-08-24
+
+### Added
+
+- Added model lifecycle notifications and scene-local product feature components.
+- Added extra-command composition and one replaceable visibility owner.
+- Adopted the reusable Deucarian WebGL browser template and lifecycle bridge.
+
 ## [0.1.20] - 2026-08-24
 
 ### Changed

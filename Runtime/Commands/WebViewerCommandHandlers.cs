@@ -9,17 +9,23 @@ namespace Deucarian.TemplateViewerWeb.Commands
     public static class WebViewerCommandHandlers
     {
         public static IReadOnlyList<ICommandHandler<WebViewerApplication>> Create(
-            IViewerAuthenticationEventPublisher authenticationEventPublisher = null)
+            IViewerAuthenticationEventPublisher authenticationEventPublisher = null,
+            bool includeGenericVisibilityCommands = true)
         {
-            return new ICommandHandler<WebViewerApplication>[]
+            var handlers = new List<ICommandHandler<WebViewerApplication>>
             {
                 new InitializeWebViewerCommandHandler(),
-                new SelectWebViewerElementsCommandHandler(),
-                new ClearWebViewerSelectionCommandHandler(),
                 new DisposeWebViewerCommandHandler(),
                 new ViewerAuthenticationCommandHandler<WebViewerApplication>(
                     authenticationEventPublisher)
             };
+            if (includeGenericVisibilityCommands)
+            {
+                handlers.Insert(1, new SelectWebViewerElementsCommandHandler());
+                handlers.Insert(2, new ClearWebViewerSelectionCommandHandler());
+            }
+
+            return handlers;
         }
     }
 

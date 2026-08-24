@@ -68,6 +68,8 @@ namespace Deucarian.TemplateViewerWeb
             authenticationAcquisitionProvider;
         private IDisposable authenticationTargetRegistration;
         private IDisposable runtimeConnection;
+        private WebViewerFeatureBehaviour[] featureBehaviours =
+            Array.Empty<WebViewerFeatureBehaviour>();
 
         public bool IframeMode => iframeMode;
         public string ParentOrigin => parentOrigin;
@@ -219,16 +221,49 @@ namespace Deucarian.TemplateViewerWeb
                         eventPublisher,
                         browserEndpoint);
 
+                featureBehaviours = GetComponents<WebViewerFeatureBehaviour>();
+                IWebViewerVisibilityFeatureFactory visibilityFactory =
+                    ResolveVisibilityFeatureFactory(featureBehaviours);
+
                 application = new WebViewerApplication(
                     new DirectWebViewerModelDescriptorResolver(),
                     modelLoader,
                     navigation,
                     eventPublisher,
                     embeddedReferenceModel,
-                    authenticationSession);
+                    authenticationSession,
+                    visibilityFactory);
+                var handlers = new List<ICommandHandler<WebViewerApplication>>(
+                    WebViewerCommandHandlers.Create(
+                        authenticationEventPublisher,
+                        includeGenericVisibilityCommands:
+                            visibilityFactory == null));
+                for (int i = 0; i < featureBehaviours.Length; i++)
+                {
+                    WebViewerFeatureBehaviour feature = featureBehaviours[i];
+                    feature.Attach(application);
+                    IReadOnlyList<ICommandHandler<WebViewerApplication>>
+                        featureHandlers = feature.CreateCommandHandlers();
+                    if (featureHandlers == null)
+                    {
+                        continue;
+                    }
+
+                    for (int j = 0; j < featureHandlers.Count; j++)
+                    {
+                        if (featureHandlers[j] == null)
+                        {
+                            throw new InvalidOperationException(
+                                "A viewer feature returned a null command handler.");
+                        }
+
+                        handlers.Add(featureHandlers[j]);
+                    }
+                }
+
                 commandRuntime = new CommandRoutingRuntime<WebViewerApplication>(
                     application,
-                    WebViewerCommandHandlers.Create(authenticationEventPublisher),
+                    handlers,
                     new CommandRoutingOptions(
                         historyCapacity: 64,
                         logSuccessfulCommands: false,
@@ -441,6 +476,14 @@ namespace Deucarian.TemplateViewerWeb
 
             WebViewerApplication currentApplication = application;
             application = null;
+            WebViewerFeatureBehaviour[] features = featureBehaviours;
+            featureBehaviours = Array.Empty<WebViewerFeatureBehaviour>();
+            for (int i = features.Length - 1; i >= 0; i--)
+            {
+                WebViewerFeatureBehaviour feature = features[i];
+                TryCleanup(() => feature?.Detach(currentApplication));
+            }
+
             TryCleanup(() => currentApplication?.Dispose());
 
             commandRuntime = null;
@@ -466,6 +509,32 @@ namespace Deucarian.TemplateViewerWeb
             }
 
             ReleaseAuthenticationComposition();
+        }
+
+        private static IWebViewerVisibilityFeatureFactory
+            ResolveVisibilityFeatureFactory(
+                IReadOnlyList<WebViewerFeatureBehaviour> features)
+        {
+            IWebViewerVisibilityFeatureFactory result = null;
+            for (int i = 0; i < features.Count; i++)
+            {
+                IWebViewerVisibilityFeatureFactory candidate =
+                    features[i].VisibilityFeatureFactory;
+                if (candidate == null)
+                {
+                    continue;
+                }
+
+                if (result != null && !ReferenceEquals(result, candidate))
+                {
+                    throw new InvalidOperationException(
+                        "Only one viewer feature may own model visibility.");
+                }
+
+                result = candidate;
+            }
+
+            return result;
         }
 
         private void ReleaseAuthenticationComposition()
