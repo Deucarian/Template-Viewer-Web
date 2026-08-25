@@ -74,6 +74,7 @@ namespace Deucarian.TemplateViewerWeb
 
         public bool IframeMode => iframeMode;
         public string ParentOrigin => parentOrigin;
+        public string TransportId => transportId;
         public WebViewerApplication Application => application;
         public ViewerNavigationReferenceCompositionProfile
             ResolvedNavigationComposition => ResolveNavigationComposition();
@@ -201,17 +202,12 @@ namespace Deucarian.TemplateViewerWeb
                     effectiveAuthenticatedOrigins);
                 modelLoader.ProgressChanged += OnModelLoadingProgress;
 
-                WebGlCommandTransportMode mode = iframeMode
-                    ? WebGlCommandTransportMode.ParentIframe
-                    : WebGlCommandTransportMode.DirectPage;
-                string[] allowedOrigins = iframeMode
-                    ? new[] { parentOrigin }
-                    : Array.Empty<string>();
-                var transportOptions = new WebGlCommandTransportOptions(
+                WebGlCommandTransportOptions transportOptions =
+                    WebViewerBrowserTransportOptions.Create(
                     transportId,
-                    mode,
-                    allowedOrigins,
-                    iframeMode ? parentOrigin : null);
+                    iframeMode,
+                    parentOrigin,
+                    new WebViewerBrowserEmbeddingContextInterop());
                 var transport = new WebGlCommandTransport(transportOptions);
                 WebGlCommandTransportBehaviour behaviour =
                     gameObject.AddComponent<WebGlCommandTransportBehaviour>();
@@ -230,6 +226,10 @@ namespace Deucarian.TemplateViewerWeb
                 featureBehaviours = GetComponents<WebViewerFeatureBehaviour>();
                 IWebViewerVisibilityFeatureFactory visibilityFactory =
                     ResolveVisibilityFeatureFactory(featureBehaviours);
+                ICommandHandler<WebViewerApplication> initializationHandler =
+                    WebViewerFeatureComposition
+                        .ResolveInitializationCommandHandler(
+                            featureBehaviours);
 
                 application = new WebViewerApplication(
                     new DirectWebViewerModelDescriptorResolver(),
@@ -243,7 +243,8 @@ namespace Deucarian.TemplateViewerWeb
                     WebViewerCommandHandlers.Create(
                         authenticationEventPublisher,
                         includeGenericVisibilityCommands:
-                            visibilityFactory == null));
+                            visibilityFactory == null,
+                        initializationHandler: initializationHandler));
                 for (int i = 0; i < featureBehaviours.Length; i++)
                 {
                     WebViewerFeatureBehaviour feature = featureBehaviours[i];

@@ -48,6 +48,13 @@ namespace Deucarian.TemplateViewerWeb
     /// </summary>
     public abstract class WebViewerFeatureBehaviour : MonoBehaviour
     {
+        /// <summary>
+        /// Replaces the generic initialize_viewer handler when a product needs
+        /// to resolve a typed project/model context before model loading.
+        /// </summary>
+        public virtual ICommandHandler<WebViewerApplication>
+            InitializationCommandHandler => null;
+
         public virtual IWebViewerVisibilityFeatureFactory
             VisibilityFeatureFactory => null;
 
@@ -71,6 +78,59 @@ namespace Deucarian.TemplateViewerWeb
 
         public virtual void Detach(WebViewerApplication application)
         {
+        }
+    }
+
+    public static class WebViewerFeatureComposition
+    {
+        public static ICommandHandler<WebViewerApplication>
+            ResolveInitializationCommandHandler(
+                IReadOnlyList<WebViewerFeatureBehaviour> features)
+        {
+            ICommandHandler<WebViewerApplication> result = null;
+            if (features == null)
+            {
+                return null;
+            }
+
+            for (int index = 0; index < features.Count; index++)
+            {
+                ICommandHandler<WebViewerApplication> candidate =
+                    features[index]?.InitializationCommandHandler;
+                if (candidate == null)
+                {
+                    continue;
+                }
+
+                if (result != null && !ReferenceEquals(result, candidate))
+                {
+                    throw new InvalidOperationException(
+                        "Only one viewer feature may own initialization.");
+                }
+
+                if (!HandlesInitialization(candidate))
+                {
+                    throw new InvalidOperationException(
+                        "A product initialization handler must handle only " +
+                        InitializeWebViewerCommandHandler.CommandName + ".");
+                }
+
+                result = candidate;
+            }
+
+            return result;
+        }
+
+        private static bool HandlesInitialization(
+            ICommandHandler<WebViewerApplication> handler)
+        {
+            IReadOnlyList<string> names = handler.CommandNames;
+            return names != null &&
+                   names.Count == 1 &&
+                   string.Equals(
+                       names[0],
+                       InitializeWebViewerCommandHandler.CommandName,
+                       StringComparison.Ordinal);
         }
     }
 }

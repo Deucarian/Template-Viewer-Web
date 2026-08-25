@@ -10,11 +10,12 @@ namespace Deucarian.TemplateViewerWeb.Commands
     {
         public static IReadOnlyList<ICommandHandler<WebViewerApplication>> Create(
             IViewerAuthenticationEventPublisher authenticationEventPublisher = null,
-            bool includeGenericVisibilityCommands = true)
+            bool includeGenericVisibilityCommands = true,
+            ICommandHandler<WebViewerApplication> initializationHandler = null)
         {
             var handlers = new List<ICommandHandler<WebViewerApplication>>
             {
-                new InitializeWebViewerCommandHandler(),
+                initializationHandler ?? new InitializeWebViewerCommandHandler(),
                 new DisposeWebViewerCommandHandler(),
                 new ViewerAuthenticationCommandHandler<WebViewerApplication>(
                     authenticationEventPublisher)
@@ -32,8 +33,10 @@ namespace Deucarian.TemplateViewerWeb.Commands
     public sealed class InitializeWebViewerCommandHandler :
         ICommandHandler<WebViewerApplication>
     {
+        public const string CommandName = "initialize_viewer";
+
         private static readonly IReadOnlyList<string> Names =
-            new[] { "initialize_viewer" };
+            new[] { CommandName };
 
         public IReadOnlyList<string> CommandNames => Names;
 

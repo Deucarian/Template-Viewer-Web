@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Deucarian.CommandRouting;
 using Deucarian.TemplateViewerWeb.Commands;
 using Deucarian.ViewerAuthentication;
 using Newtonsoft.Json.Linq;
@@ -57,6 +58,23 @@ namespace Deucarian.TemplateViewerWeb.Tests
             Assert.That(names, Does.Not.Contain("clear_selection"));
             Assert.That(names, Does.Contain("initialize_viewer"));
             Assert.That(names, Does.Contain("dispose_viewer"));
+        }
+
+        [Test]
+        public void ProductInitializationCanReplaceGenericInitializer()
+        {
+            var productHandler = new ProductInitializationHandler();
+
+            ICommandHandler<WebViewerApplication>[] handlers =
+                WebViewerCommandHandlers.Create(
+                        initializationHandler: productHandler)
+                    .ToArray();
+
+            Assert.That(handlers[0], Is.SameAs(productHandler));
+            Assert.That(
+                handlers.SelectMany(handler => handler.CommandNames)
+                    .Count(name => name == "initialize_viewer"),
+                Is.EqualTo(1));
         }
 
         [Test]
@@ -129,6 +147,18 @@ namespace Deucarian.TemplateViewerWeb.Tests
                 RemoteEndpoint = remoteEndpoint;
                 return Task.CompletedTask;
             }
+        }
+
+        private sealed class ProductInitializationHandler :
+            ICommandHandler<WebViewerApplication>
+        {
+            public System.Collections.Generic.IReadOnlyList<string>
+                CommandNames { get; } = new[] { "initialize_viewer" };
+
+            public Task<CommandResult> HandleAsync(
+                CommandExecutionContext<WebViewerApplication> context,
+                CancellationToken cancellationToken) =>
+                Task.FromResult(CommandResult.Success());
         }
     }
 }

@@ -36,7 +36,8 @@ of copying a viewer application:
   lifecycle bridge shared by browser-hosted viewers.
 
 Product packages may add `WebViewerFeatureBehaviour` components beside the
-bootstrap. They can contribute commands and one replaceable visibility owner.
+bootstrap. They can contribute commands, one replaceable initialization
+handler, and one replaceable visibility owner.
 When a product owns visibility, the generic `select_elements` controller is not
 created, so two systems never compete over model active states. Model loading,
 navigation, camera state, browser transport, and shell behavior stay shared.
@@ -194,6 +195,22 @@ allowed and target origin, validates the parent source window, and never sends
 to `*`. Production validation additionally requires a non-loopback HTTPS origin.
 The host owns the Unity instance and disposes its listeners on teardown.
 
+A WebGL build automatically selects secure parent-iframe mode when it is
+embedded. The deployment page must set the exact backoffice origin before the
+Unity loader starts:
+
+```html
+<script>
+  window.deucarianWebViewerConfig = {
+    parentOrigin: "https://backoffice.example.com"
+  };
+</script>
+```
+
+Top-level localhost builds remain in direct-page mode. An embedded build with
+missing, wildcard, path-bearing, credential-bearing, or otherwise invalid
+configuration fails closed and does not install a browser command route.
+
 Model downloads use Object Loading API Integration's shared trusted-origin
 policy. API-relative URLs are first resolved to a canonical absolute URL against
 the active connection's API base. Absolute URLs must match that base origin or
@@ -222,6 +239,10 @@ Build Pipeline excludes development diagnostics and development-context files.
 
 - implement `IWebViewerModelDescriptorResolver` for application API/model
   version resolution;
+- override `WebViewerFeatureBehaviour.InitializationCommandHandler` when a
+  product has a typed project/model initialization contract;
+- call `WebViewerApplication.PublishEventAsync` for product lifecycle events
+  that must use the same secured browser route;
 - implement `IWebViewerModelLoader` only when Object Loading cannot represent
   the source;
 - replace the example `WebViewerElement` index/controller with a domain-owned

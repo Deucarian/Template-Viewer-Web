@@ -39,7 +39,9 @@ namespace Deucarian.TemplateViewerWeb.Editor
 
             var handlers = new List<ICommandHandler<WebViewerApplication>>(
                 WebViewerCommandHandlers.Create(
-                    includeGenericVisibilityCommands: !hasProductVisibility));
+                    includeGenericVisibilityCommands: !hasProductVisibility,
+                    initializationHandler: WebViewerFeatureComposition
+                        .ResolveInitializationCommandHandler(features)));
             var scenarios = new List<WebViewerCommandHarnessScenario>(
                 WebViewerCommandHarnessCatalogBuilder.CreateGenericScenarios(
                     includeGenericVisibilityCommands: !hasProductVisibility));

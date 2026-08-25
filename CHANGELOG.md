@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.6] - 2026-08-25
+
+### Added
+
+- Resolve secure parent-iframe mode from deployment-owned browser
+  configuration while preserving direct-page localhost and Editor workflows.
+- Let one product feature replace the generic `initialize_viewer` handler and
+  publish product lifecycle events through the viewer's secured transport.
+
+### Security
+
+- Embedded builds fail closed when `window.deucarianWebViewerConfig` does not
+  contain one exact HTTP(S) `parentOrigin`; serialized localhost origins are
+  never used as an iframe fallback.
+
 ## [0.3.5] - 2026-08-25
 
 ### Fixed

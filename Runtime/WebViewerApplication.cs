@@ -70,6 +70,35 @@ namespace Deucarian.TemplateViewerWeb
         public IViewerAuthenticationSession AuthenticationSession =>
             authenticationSession;
 
+        /// <summary>
+        /// Publishes a product-owned browser event through the same secured
+        /// transport and endpoint as the viewer lifecycle.
+        /// </summary>
+        public Task PublishEventAsync(
+            string eventName,
+            JObject payload,
+            string remoteEndpoint,
+            CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(eventName))
+            {
+                throw new ArgumentException(
+                    "A browser event name is required.",
+                    nameof(eventName));
+            }
+
+            if (disposed)
+            {
+                throw new ObjectDisposedException(GetType().Name);
+            }
+
+            return eventPublisher.PublishAsync(
+                eventName.Trim(),
+                payload ?? new JObject(),
+                remoteEndpoint,
+                cancellationToken);
+        }
+
         public async Task<CommandOperationResult> InitializeAsync(
             WebViewerInitializeRequest request,
             string remoteEndpoint,
