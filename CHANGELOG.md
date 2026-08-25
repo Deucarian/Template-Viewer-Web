@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.4] - 2026-08-25
+
+### Fixed
+
+- Describe the pre-command state as waiting for viewer initialization instead
+  of incorrectly implying that local Editor Play Mode requires a browser host.
+
 ## [0.3.3] - 2026-08-25
 
 ### Fixed

@@ -50,9 +50,9 @@ namespace Deucarian.TemplateViewerWeb
                 case WebViewerLifecycleState.Created:
                     DeucarianWebGLShell.ReportState(
                         DeucarianWebGLShellState.Loading,
-                        "Waiting for browser host");
+                        "Waiting for viewer initialization");
                     Apply(ViewerShellStatusSnapshot.Uninitialized(
-                        "Waiting for browser host",
+                        "Waiting for viewer initialization",
                         diagnostics));
                     break;
                 case WebViewerLifecycleState.Loading:
