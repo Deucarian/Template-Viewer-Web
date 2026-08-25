@@ -5,6 +5,7 @@
     "Deucarian.API",
     "Deucarian.CameraNavigation",
     "Deucarian.CommandRouting",
+    "Deucarian.CommandRouting.WebGLIntegration",
     "Deucarian.CommandRouting.Editor",
     "Deucarian.ObjectLoading.APIIntegration",
     "Deucarian.Session",

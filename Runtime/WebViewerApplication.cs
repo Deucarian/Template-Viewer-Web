@@ -229,6 +229,19 @@ namespace Deucarian.TemplateViewerWeb
             {
                 return SupersededInitialization();
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                return await FailInitializationAsync(
+                    request.Revision,
+                    "Viewer initialization failed unexpectedly.",
+                    remoteEndpoint,
+                    generation,
+                    token);
+            }
         }
 
         public async Task<CommandOperationResult> SelectAsync(
@@ -349,16 +362,28 @@ namespace Deucarian.TemplateViewerWeb
         {
             ResetCurrentModel();
             SetLifecycle(WebViewerLifecycleState.Failed);
-            await eventPublisher.PublishAsync(
-                "viewer_failed",
-                new JObject
-                {
-                    ["revision"] = revision,
-                    ["code"] = "initialization_failed",
-                    ["message"] = message
-                },
-                remoteEndpoint,
-                cancellationToken);
+            try
+            {
+                await eventPublisher.PublishAsync(
+                    "viewer_failed",
+                    new JObject
+                    {
+                        ["revision"] = revision,
+                        ["code"] = "initialization_failed",
+                        ["message"] = message
+                    },
+                    remoteEndpoint,
+                    cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception)
+            {
+                // Failure notification is best effort. The local lifecycle must
+                // remain Failed even when the browser event route is unavailable.
+            }
             if (!IsInitializationCurrent(generation, cancellationToken))
             {
                 return SupersededInitialization();
