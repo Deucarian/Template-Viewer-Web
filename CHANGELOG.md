@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.5] - 2026-08-25
+
+### Fixed
+
+- Transition the viewer lifecycle to Failed when initialization or lifecycle
+  event publication throws, even when the failure event cannot be delivered.
+- Require Viewer Authentication 0.5.1 so standalone template installations
+  retain authenticated Editor sessions through Play Mode transitions.
+
 ## [0.3.4] - 2026-08-25
 
 ### Fixed

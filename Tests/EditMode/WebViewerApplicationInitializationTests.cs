@@ -85,6 +85,20 @@ namespace Deucarian.TemplateViewerWeb.Tests
             Assert.That(embeddedModel.activeSelf, Is.False);
         }
 
+        [Test]
+        public async Task EventPublishingFailureTransitionsLifecycleToFailed()
+        {
+            publisher.ThrowOnLoading = true;
+            publisher.ThrowOnFailure = true;
+
+            CommandOperationResult result = await InitializeAsync(12);
+
+            Assert.That(result.Succeeded, Is.False);
+            Assert.That(result.ErrorCode, Is.EqualTo("initialization_failed"));
+            Assert.That(application.Lifecycle, Is.EqualTo(WebViewerLifecycleState.Failed));
+            Assert.That(embeddedModel.activeSelf, Is.False);
+        }
+
         private Task<CommandOperationResult> InitializeAsync(long revision) =>
             application.InitializeAsync(
                 new WebViewerInitializeRequest { Revision = revision },
@@ -114,12 +128,25 @@ namespace Deucarian.TemplateViewerWeb.Tests
                 new TaskCompletionSource<bool>();
             private int loadingCount;
 
+            public bool ThrowOnLoading { get; set; }
+            public bool ThrowOnFailure { get; set; }
+
             public Task PublishAsync(
                 string eventName,
                 JObject payload,
                 string remoteEndpoint,
                 CancellationToken cancellationToken = default)
             {
+                if (eventName == "viewer_loading" && ThrowOnLoading)
+                {
+                    throw new InvalidOperationException("Loading event route failed.");
+                }
+
+                if (eventName == "viewer_failed" && ThrowOnFailure)
+                {
+                    throw new InvalidOperationException("Failure event route failed.");
+                }
+
                 if (eventName == "viewer_loading" &&
                     Interlocked.Increment(ref loadingCount) == 1)
                 {
