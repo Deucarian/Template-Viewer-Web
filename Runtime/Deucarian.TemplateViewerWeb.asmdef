@@ -9,27 +9,11 @@
     "Deucarian.WebGLTemplate",
     "Newtonsoft.Json"
   ],
-  "includePlatforms": [],
-  "excludePlatforms": [
-    "Android",
-    "CloudRendering",
-    "EmbeddedLinux",
-    "GameCoreScarlett",
-    "GameCoreXboxOne",
-    "LinuxStandalone64",
-    "Lumin",
-    "macOSStandalone",
-    "PS4",
-    "PS5",
-    "Stadia",
-    "Switch",
-    "tvOS",
-    "WSA",
-    "WindowsStandalone32",
-    "WindowsStandalone64",
-    "XboxOne",
-    "iOS"
+  "includePlatforms": [
+    "Editor",
+    "WebGL"
   ],
+  "excludePlatforms": [],
   "allowUnsafeCode": false,
   "overrideReferences": false,
   "precompiledReferences": [],
