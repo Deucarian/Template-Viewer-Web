@@ -26,6 +26,7 @@
     "com.deucarian.command-routing.webgl-integration": "0.1.1",
     "com.deucarian.diagnostics": "0.1.4",
     "com.deucarian.template.viewer": "0.1.0",
+    "com.deucarian.viewer-authentication": "0.5.1",
     "com.deucarian.webgl-template": "0.1.0",
     "com.unity.nuget.newtonsoft-json": "3.2.2"
   },

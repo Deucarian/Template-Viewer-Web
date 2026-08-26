@@ -15,6 +15,11 @@
 - Restricted the adapter runtime and sample assemblies to Editor and WebGL so
   the same Unity project can install other platform adapters without pulling
   browser runtime code into desktop or XR players.
+- Reject Web build scenes unless they contain exactly one `ViewerBootstrap`
+  and that component is the Web adapter, preventing mixed platform
+  compositions from shipping accidentally.
+- Declare the viewer-authentication dependency required by the editor command
+  catalog against the platform-neutral core API.
 
 ## [0.3.7] - 2026-08-26
 
