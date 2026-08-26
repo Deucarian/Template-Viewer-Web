@@ -188,6 +188,19 @@ namespace Deucarian.TemplateViewerWeb
                         token);
                 }
 
+                if (!WebViewerModelPresentation.TryPrepare(
+                        referenceRoot.transform,
+                        request,
+                        out string presentationError))
+                {
+                    return await FailInitializationAsync(
+                        request.Revision,
+                        presentationError,
+                        remoteEndpoint,
+                        generation,
+                        token);
+                }
+
                 var modelContext = new WebViewerModelContext(
                     referenceRoot,
                     descriptor,

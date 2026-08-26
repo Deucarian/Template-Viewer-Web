@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.3.7] - 2026-08-26
+
+### Added
+
+- Let product initialization apply a runtime-only model placement and opt into
+  shared renderer-bounds centering before visibility and navigation compose.
+
+### Changed
+
+- Use the stable loaded-model parent as the reference root so placement and
+  centering preserve every AssetBundle-authored child transform.
+- Include inactive model renderers in origin preparation without changing any
+  object visibility.
+
 ## [0.3.6] - 2026-08-25
 
 ### Added

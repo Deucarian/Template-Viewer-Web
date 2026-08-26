@@ -40,6 +40,55 @@ namespace Deucarian.TemplateViewerWeb
 
         [JsonProperty("append_platform_query")]
         public bool AppendPlatformQuery { get; set; } = true;
+
+        /// <summary>
+        /// Product-resolved model placement. This is runtime composition state,
+        /// not a second browser payload contract.
+        /// </summary>
+        [JsonIgnore]
+        public WebViewerModelPlacement ModelPlacement { get; set; }
+
+        /// <summary>
+        /// Opts the composition root into centering the complete model bounds
+        /// before product visibility and navigation are initialized.
+        /// </summary>
+        [JsonIgnore]
+        public bool CenterModelOnWorldOrigin { get; set; }
+    }
+
+    public sealed class WebViewerModelPlacement
+    {
+        public WebViewerModelPlacement()
+            : this(Vector3.zero, Vector3.zero, Vector3.one)
+        {
+        }
+
+        public WebViewerModelPlacement(
+            Vector3 position,
+            Vector3 rotationEuler,
+            Vector3 scale)
+        {
+            Position = position;
+            RotationEuler = rotationEuler;
+            Scale = scale;
+        }
+
+        public Vector3 Position { get; }
+        public Vector3 RotationEuler { get; }
+        public Vector3 Scale { get; }
+
+        internal bool IsFinite() =>
+            IsFinite(Position) &&
+            IsFinite(RotationEuler) &&
+            IsFinite(Scale);
+
+        private static bool IsFinite(Vector3 value) =>
+            IsFinite(value.x) &&
+            IsFinite(value.y) &&
+            IsFinite(value.z);
+
+        private static bool IsFinite(float value) =>
+            !float.IsNaN(value) && !float.IsInfinity(value);
     }
 
     [Serializable]

@@ -117,10 +117,8 @@ namespace Deucarian.TemplateViewerWeb.Loading
                 }
 
                 activePipeline = pipeline;
-                GameObject referenceRoot = result.Handle.InstantiatedObjects.Count == 1
-                    ? result.Handle.InstantiatedObjects[0]
-                    : modelParent.gameObject;
-                completion.TrySetResult(WebViewerModelLoadResult.Success(referenceRoot));
+                completion.TrySetResult(
+                    WebViewerModelLoadResult.Success(modelParent.gameObject));
             }));
             return completion.Task;
         }
