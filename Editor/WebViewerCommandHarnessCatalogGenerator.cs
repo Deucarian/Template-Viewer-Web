@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Deucarian.CommandRouting;
-using Deucarian.TemplateViewerWeb.Commands;
+using Deucarian.TemplateViewer;
+using Deucarian.TemplateViewer.Commands;
 using Newtonsoft.Json;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -16,7 +17,7 @@ namespace Deucarian.TemplateViewerWeb.Editor
         public const string DefaultCatalogPath =
             "Library/Deucarian/WebViewerHarness/commands.generated.json";
 
-        public static WebViewerCommandHarnessCatalog CreateCatalog(
+        public static ViewerCommandHarnessCatalog CreateCatalog(
             WebViewerBootstrap bootstrap)
         {
             if (bootstrap == null)
@@ -24,8 +25,8 @@ namespace Deucarian.TemplateViewerWeb.Editor
                 throw new ArgumentNullException(nameof(bootstrap));
             }
 
-            WebViewerFeatureBehaviour[] features =
-                bootstrap.GetComponents<WebViewerFeatureBehaviour>();
+            ViewerFeatureBehaviour[] features =
+                bootstrap.GetComponents<ViewerFeatureBehaviour>();
             bool hasProductVisibility = false;
             for (int index = 0; index < features.Length; index++)
             {
@@ -37,15 +38,15 @@ namespace Deucarian.TemplateViewerWeb.Editor
                 }
             }
 
-            var handlers = new List<ICommandHandler<WebViewerApplication>>(
-                WebViewerCommandHandlers.Create(
+            var handlers = new List<ICommandHandler<ViewerApplication>>(
+                ViewerCommandHandlers.Create(
                     includeGenericVisibilityCommands: !hasProductVisibility,
-                    initializationHandler: WebViewerFeatureComposition
+                    initializationHandler: ViewerFeatureComposition
                         .ResolveInitializationCommandHandler(features)));
-            var scenarios = new List<WebViewerCommandHarnessScenario>(
-                WebViewerCommandHarnessCatalogBuilder.CreateGenericScenarios(
+            var scenarios = new List<ViewerCommandHarnessScenario>(
+                ViewerCommandHarnessCatalogBuilder.CreateGenericScenarios(
                     includeGenericVisibilityCommands: !hasProductVisibility));
-            WebViewerCommandHarnessScenario disposeScenario =
+            ViewerCommandHarnessScenario disposeScenario =
                 features.Length > 0
                     ? scenarios.Find(value => value.Id == "dispose")
                     : null;
@@ -56,20 +57,20 @@ namespace Deucarian.TemplateViewerWeb.Editor
 
             for (int index = 0; index < features.Length; index++)
             {
-                WebViewerFeatureBehaviour feature = features[index];
+                ViewerFeatureBehaviour feature = features[index];
                 if (feature == null)
                 {
                     continue;
                 }
 
-                IReadOnlyList<ICommandHandler<WebViewerApplication>>
+                IReadOnlyList<ICommandHandler<ViewerApplication>>
                     featureHandlers = feature.CreateCommandHandlers();
                 if (featureHandlers != null)
                 {
                     handlers.AddRange(featureHandlers);
                 }
 
-                IReadOnlyList<WebViewerCommandHarnessScenario>
+                IReadOnlyList<ViewerCommandHarnessScenario>
                     featureScenarios =
                         feature.CreateCommandHarnessScenarios();
                 if (featureScenarios != null)
@@ -83,12 +84,12 @@ namespace Deucarian.TemplateViewerWeb.Editor
                 scenarios.Add(disposeScenario);
             }
 
-            return WebViewerCommandHarnessCatalogBuilder.Create(
+            return ViewerCommandHarnessCatalogBuilder.Create(
                 handlers,
                 scenarios);
         }
 
-        public static WebViewerCommandHarnessCatalog GenerateForScene(
+        public static ViewerCommandHarnessCatalog GenerateForScene(
             string scenePath,
             string catalogPath = DefaultCatalogPath)
         {
@@ -124,7 +125,7 @@ namespace Deucarian.TemplateViewerWeb.Editor
                         "The viewer scene has no WebViewerBootstrap.");
                 }
 
-                WebViewerCommandHarnessCatalog catalog =
+                ViewerCommandHarnessCatalog catalog =
                     CreateCatalog(bootstrap);
                 Write(catalog, catalogPath);
                 return catalog;
@@ -139,7 +140,7 @@ namespace Deucarian.TemplateViewerWeb.Editor
         }
 
         public static void Write(
-            WebViewerCommandHarnessCatalog catalog,
+            ViewerCommandHarnessCatalog catalog,
             string catalogPath = DefaultCatalogPath)
         {
             if (catalog == null)

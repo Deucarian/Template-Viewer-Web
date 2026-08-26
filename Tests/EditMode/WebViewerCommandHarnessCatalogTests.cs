@@ -6,7 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Deucarian.CommandRouting;
 using Deucarian.CommandRouting.Editor;
-using Deucarian.TemplateViewerWeb.Commands;
+using Deucarian.TemplateViewer;
+using Deucarian.TemplateViewer.Commands;
 using Deucarian.TemplateViewerWeb.Editor;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
@@ -35,10 +36,10 @@ namespace Deucarian.TemplateViewerWeb.Tests
             WebViewerBootstrap bootstrap =
                 root.AddComponent<WebViewerBootstrap>();
 
-            WebViewerCommandHarnessCatalog catalog =
+            ViewerCommandHarnessCatalog catalog =
                 WebViewerCommandHarnessCatalogGenerator.CreateCatalog(
                     bootstrap);
-            string[] registered = WebViewerCommandHandlers.Create()
+            string[] registered = ViewerCommandHandlers.Create()
                 .SelectMany(handler => handler.CommandNames)
                 .OrderBy(value => value, StringComparer.Ordinal)
                 .ToArray();
@@ -65,7 +66,7 @@ namespace Deucarian.TemplateViewerWeb.Tests
             root = new GameObject("Checked Browser Catalog");
             WebViewerBootstrap bootstrap =
                 root.AddComponent<WebViewerBootstrap>();
-            WebViewerCommandHarnessCatalog generated =
+            ViewerCommandHarnessCatalog generated =
                 WebViewerCommandHarnessCatalogGenerator.CreateCatalog(
                     bootstrap);
             PackageInfo package = PackageInfo.FindForAssembly(
@@ -92,7 +93,7 @@ namespace Deucarian.TemplateViewerWeb.Tests
                 root.AddComponent<WebViewerBootstrap>();
             root.AddComponent<HarnessFeature>();
 
-            WebViewerCommandHarnessCatalog catalog =
+            ViewerCommandHarnessCatalog catalog =
                 WebViewerCommandHarnessCatalogGenerator.CreateCatalog(
                     bootstrap);
             string[] commands = catalog.Scenarios
@@ -103,12 +104,12 @@ namespace Deucarian.TemplateViewerWeb.Tests
             Assert.That(commands, Does.Contain("set_focus"));
             Assert.That(commands, Does.Not.Contain("select_elements"));
             Assert.That(commands, Does.Not.Contain("clear_selection"));
-            WebViewerCommandHarnessScenario scenario =
+            ViewerCommandHarnessScenario scenario =
                 catalog.Scenarios.Single(value => value.Id == "set-focus");
             Assert.That(scenario.RunAutomatically, Is.True);
             Assert.That(scenario.Payload.Value<long>("revision"), Is.EqualTo(4));
             Assert.That(catalog.DefaultScenarioId, Is.EqualTo("set-focus"));
-            List<WebViewerCommandHarnessScenario> orderedScenarios =
+            List<ViewerCommandHarnessScenario> orderedScenarios =
                 catalog.Scenarios.ToList();
             Assert.That(
                 orderedScenarios.IndexOf(scenario),
@@ -120,10 +121,10 @@ namespace Deucarian.TemplateViewerWeb.Tests
         public void CommandsWithoutExamplesRemainVisibleButAreNotAutomated()
         {
             var handlers = new[] { new HarnessCommandHandler("inspect_state") };
-            WebViewerCommandHarnessCatalog catalog =
-                WebViewerCommandHarnessCatalogBuilder.Create(
+            ViewerCommandHarnessCatalog catalog =
+                ViewerCommandHarnessCatalogBuilder.Create(
                     handlers,
-                    Array.Empty<WebViewerCommandHarnessScenario>());
+                    Array.Empty<ViewerCommandHarnessScenario>());
 
             Assert.That(catalog.Scenarios.Count, Is.EqualTo(1));
             Assert.That(catalog.Scenarios[0].CommandName, Is.EqualTo("inspect_state"));
@@ -137,12 +138,12 @@ namespace Deucarian.TemplateViewerWeb.Tests
             var handlers = new[] { new HarnessCommandHandler("set_focus") };
             var scenarios = new[]
             {
-                new WebViewerCommandHarnessScenario(
+                new ViewerCommandHarnessScenario(
                     "first",
                     "First",
                     "set_focus",
                     isDefault: true),
-                new WebViewerCommandHarnessScenario(
+                new ViewerCommandHarnessScenario(
                     "second",
                     "Second",
                     "set_focus",
@@ -150,7 +151,7 @@ namespace Deucarian.TemplateViewerWeb.Tests
             };
 
             Assert.Throws<InvalidOperationException>(() =>
-                WebViewerCommandHarnessCatalogBuilder.Create(
+                ViewerCommandHarnessCatalogBuilder.Create(
                     handlers,
                     scenarios));
         }
@@ -180,21 +181,21 @@ namespace Deucarian.TemplateViewerWeb.Tests
         }
 
         public sealed class HarnessFeature :
-            WebViewerFeatureBehaviour,
-            IWebViewerVisibilityFeatureFactory
+            ViewerFeatureBehaviour,
+            IViewerVisibilityFeatureFactory
         {
-            public override IWebViewerVisibilityFeatureFactory
+            public override IViewerVisibilityFeatureFactory
                 VisibilityFeatureFactory => this;
 
-            public override IReadOnlyList<ICommandHandler<WebViewerApplication>>
+            public override IReadOnlyList<ICommandHandler<ViewerApplication>>
                 CreateCommandHandlers() =>
                     new[] { new HarnessCommandHandler("set_focus") };
 
-            public override IReadOnlyList<WebViewerCommandHarnessScenario>
+            public override IReadOnlyList<ViewerCommandHarnessScenario>
                 CreateCommandHarnessScenarios() =>
                     new[]
                     {
-                        new WebViewerCommandHarnessScenario(
+                        new ViewerCommandHarnessScenario(
                             "set-focus",
                             "Set focus",
                             "set_focus",
@@ -203,8 +204,8 @@ namespace Deucarian.TemplateViewerWeb.Tests
                     };
 
             public bool TryCreate(
-                WebViewerModelContext context,
-                out IWebViewerVisibilityFeature feature,
+                ViewerModelContext context,
+                out IViewerVisibilityFeature feature,
                 out string error)
             {
                 feature = null;
@@ -214,7 +215,7 @@ namespace Deucarian.TemplateViewerWeb.Tests
         }
 
         private sealed class HarnessCommandHandler :
-            ICommandHandler<WebViewerApplication>
+            ICommandHandler<ViewerApplication>
         {
             private readonly IReadOnlyList<string> commandNames;
 
@@ -226,7 +227,7 @@ namespace Deucarian.TemplateViewerWeb.Tests
             public IReadOnlyList<string> CommandNames => commandNames;
 
             public Task<CommandResult> HandleAsync(
-                CommandExecutionContext<WebViewerApplication> context,
+                CommandExecutionContext<ViewerApplication> context,
                 CancellationToken cancellationToken) =>
                     Task.FromResult(CommandResult.Success());
         }
