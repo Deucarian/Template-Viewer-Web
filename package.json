@@ -1,6 +1,6 @@
 {
   "name": "com.deucarian.template.viewer.web",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "displayName": "Deucarian Web Viewer Adapter",
   "description": "WebGL adapter for the platform-neutral Deucarian Viewer Template, with secure browser commands, page lifecycle projection, a local browser harness, and project-owned build profiles.",
   "unity": "6000.0",
@@ -25,7 +25,7 @@
     "com.deucarian.command-routing": "0.2.2",
     "com.deucarian.command-routing.webgl-integration": "0.1.1",
     "com.deucarian.diagnostics": "0.1.4",
-    "com.deucarian.template.viewer": "0.1.0",
+    "com.deucarian.template.viewer": "0.1.1",
     "com.deucarian.authentication": "1.0.0",
     "com.deucarian.webgl-template": "0.1.0",
     "com.unity.nuget.newtonsoft-json": "3.2.2"

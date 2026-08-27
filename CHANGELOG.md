@@ -1,12 +1,20 @@
 # Changelog
 
-## [0.5.1] - 2026-08-27
+## [0.5.2] - 2026-08-27
 
 ### Changed
 
 - Replaced the retired Viewer Authentication dependency and assembly reference
   with generic `com.deucarian.authentication` 1.0.0 while preserving the
   platform-neutral Viewer Template/Web adapter split introduced in 0.5.0.
+
+## [0.5.1] - 2026-08-27
+
+### Changed
+
+- Updated the platform-neutral viewer core dependency to 0.1.1 so Web
+  products can complete product-owned model preparation before
+  `viewer_ready` without moving that behavior into the browser adapter.
 
 ## [0.5.0] - 2026-08-26
 
