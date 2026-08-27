@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.4] - 2026-08-27
+
+### Changed
+
+- Declared the generic Authentication viewer-integration assembly anywhere
+  editor and validation code consumes authentication contracts exposed by the
+  platform-neutral Viewer Template.
+
 ## [0.5.3] - 2026-08-27
 
 ### Changed

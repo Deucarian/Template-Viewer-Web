@@ -1,6 +1,6 @@
 {
   "name": "com.deucarian.template.viewer.web",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "displayName": "Deucarian Web Viewer Adapter",
   "description": "WebGL adapter for the platform-neutral Deucarian Viewer Template, with secure browser commands, page lifecycle projection, a local browser harness, and project-owned build profiles.",
   "unity": "6000.0",

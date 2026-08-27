@@ -9,6 +9,7 @@
     "Deucarian.TemplateViewerWeb",
     "Deucarian.TemplateViewerWeb.Editor",
     "Deucarian.Authentication",
+    "Deucarian.Authentication.ViewerIntegration",
     "Newtonsoft.Json"
   ],
   "includePlatforms": [
