@@ -6,7 +6,7 @@ using Deucarian.API.Configuration;
 using Deucarian.API.Core;
 using Deucarian.API;
 using Deucarian.Session.APIIntegration;
-using Deucarian.ViewerAuthentication;
+using Deucarian.Authentication;
 using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -126,7 +126,7 @@ namespace Deucarian.TemplateViewerWeb.Tests
             Assert.That(sessionField, Is.Not.Null);
             Assert.That(
                 sessionField.FieldType,
-                Is.EqualTo(typeof(IViewerAuthenticationSession)));
+                Is.EqualTo(typeof(IAuthenticationSession)));
         }
 
         [Test]
@@ -134,9 +134,9 @@ namespace Deucarian.TemplateViewerWeb.Tests
         {
             string targetId = "template-runtime-connection-test-" +
                               Guid.NewGuid().ToString("N");
-            var registeredSession = ViewerAuthenticationSession.CreateTransient();
+            var registeredSession = AuthenticationSession.CreateTransient();
             IDisposable registration =
-                ViewerAuthenticationTargetRegistry.Register(
+                AuthenticationTargetRegistry.Register(
                     targetId,
                     "Template Runtime Connection Test",
                     registeredSession);
@@ -153,7 +153,7 @@ namespace Deucarian.TemplateViewerWeb.Tests
                     NoopDisposable.Instance);
                 mismatchedConnection = new ViewerRuntimeConnection(
                     targetId,
-                    ViewerAuthenticationSession.CreateTransient(),
+                    AuthenticationSession.CreateTransient(),
                     ApiClientFactory.CreateDefault(),
                     "https://api.example.invalid",
                     null,
@@ -246,7 +246,7 @@ namespace Deucarian.TemplateViewerWeb.Tests
 
                 compose.Invoke(bootstrap, new object[] { null, null, null });
                 Assert.That(
-                    ViewerAuthenticationTargetRegistry.TryGet(
+                    AuthenticationTargetRegistry.TryGet(
                         targetId,
                         out _),
                     Is.True);
@@ -254,7 +254,7 @@ namespace Deucarian.TemplateViewerWeb.Tests
                 release.Invoke(bootstrap, null);
 
                 Assert.That(
-                    ViewerAuthenticationTargetRegistry.TryGet(
+                    AuthenticationTargetRegistry.TryGet(
                         targetId,
                         out _),
                     Is.False);
@@ -319,7 +319,7 @@ namespace Deucarian.TemplateViewerWeb.Tests
                     {
                         ApiClientFactory.Create(apiClientConfig)
                     }) as
-                    IInteractiveViewerAuthenticationAcquisitionProvider;
+                    IInteractiveAuthenticationAcquisitionProvider;
 
                 Assert.That(
                     bootstrap.ResolvedAuthenticationTokenEndpointProfile,
@@ -374,13 +374,13 @@ namespace Deucarian.TemplateViewerWeb.Tests
             internal RecordingConnectionProvider(string id)
             {
                 targetId = id;
-                Session = ViewerAuthenticationSession.CreateTransient();
+                Session = AuthenticationSession.CreateTransient();
                 ApiClient = ApiClientFactory.CreateDefault();
             }
 
             public string Id => targetId;
 
-            internal ViewerAuthenticationSession Session { get; }
+            internal AuthenticationSession Session { get; }
 
             internal IApiClient ApiClient { get; }
 
@@ -394,7 +394,7 @@ namespace Deucarian.TemplateViewerWeb.Tests
             {
                 CreateCount++;
                 IDisposable targetRegistration =
-                    ViewerAuthenticationTargetRegistry.Register(
+                    AuthenticationTargetRegistry.Register(
                         targetId,
                         "Resolved Connection Test",
                         Session);

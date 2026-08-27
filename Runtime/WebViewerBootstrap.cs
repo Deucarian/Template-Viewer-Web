@@ -13,7 +13,7 @@ using Deucarian.TemplateViewerWeb.Diagnostics;
 using Deucarian.TemplateViewerWeb.Loading;
 using Deucarian.TemplateViewerWeb.Selection;
 using Deucarian.Theming;
-using Deucarian.ViewerAuthentication;
+using Deucarian.Authentication;
 using Deucarian.ViewerNavigation;
 using Deucarian.ViewerNavigation.UI;
 using Deucarian.ViewerRendering;
@@ -41,7 +41,7 @@ namespace Deucarian.TemplateViewerWeb
         [SerializeField] private ApiClientConfig apiClientConfig;
 
         [Header("Authentication")]
-        [Tooltip("Optional credential-free token endpoint profile. When omitted, the shared Viewer Authentication Resources profile is used when present.")]
+        [Tooltip("Optional credential-free token endpoint profile. Assign it explicitly when this standalone template owns token acquisition.")]
         [SerializeField] private SessionTokenEndpointProfile
             authenticationTokenEndpointProfile;
         [Tooltip("Additional exact HTTP(S) origins eligible for the live session provider. Unlisted absolute cross-origin URLs remain anonymous public downloads.")]
@@ -64,8 +64,8 @@ namespace Deucarian.TemplateViewerWeb
         private WebViewerShellStatusAdapter shellStatusAdapter;
         private DeucarianThemeProvider referenceThemeProvider;
         private DeucarianViewerReferenceThemeRuntime referenceThemeRuntime;
-        private IViewerAuthenticationSession authenticationSession;
-        private IViewerAuthenticationAcquisitionProvider
+        private IAuthenticationSession authenticationSession;
+        private IAuthenticationAcquisitionProvider
             authenticationAcquisitionProvider;
         private IDisposable authenticationTargetRegistration;
         private IDisposable runtimeConnection;
@@ -102,11 +102,8 @@ namespace Deucarian.TemplateViewerWeb
                 ResolvedNavigationComposition.ThemeMode);
         public SessionTokenEndpointProfile
             ResolvedAuthenticationTokenEndpointProfile =>
-                authenticationTokenEndpointProfile ??
-                Resources.Load<SessionTokenEndpointProfile>(
-                    ViewerAuthenticationEndpointProviderFactory
-                        .DefaultProfileResourcePath);
-        public IViewerAuthenticationAcquisitionProvider
+                authenticationTokenEndpointProfile;
+        public IAuthenticationAcquisitionProvider
             AuthenticationAcquisitionProvider =>
                 authenticationAcquisitionProvider;
         public CommandRoutePortBehaviour LocalCommandPort => localCommandPort;
@@ -313,14 +310,14 @@ namespace Deucarian.TemplateViewerWeb
 
             if (ShouldUseLocalAuthentication(resolution.Status))
             {
-                var localSession = new ViewerAuthenticationSession();
+                var localSession = new AuthenticationSession();
                 IApiClient localClient = ApiClientFactory.Create(
                     apiClientConfig,
                     localSession.ApiAuthProvider);
-                IViewerAuthenticationAcquisitionProvider localProvider =
+                IAuthenticationAcquisitionProvider localProvider =
                     CreateAuthenticationAcquisitionProvider(localClient);
                 IDisposable localRegistration =
-                    ViewerAuthenticationTargetRegistry.Register(
+                    AuthenticationTargetRegistry.Register(
                         "web-viewer-" + GetInstanceID(),
                         "Web Viewer",
                         localSession,
@@ -347,9 +344,9 @@ namespace Deucarian.TemplateViewerWeb
 
             try
             {
-                ViewerAuthenticationTargetRegistry.TryGet(
+                AuthenticationTargetRegistry.TryGet(
                     connection.TargetId,
-                    out ViewerAuthenticationTarget target);
+                    out AuthenticationTarget target);
                 authenticationSession = connection.Session;
                 authenticationAcquisitionProvider =
                     target?.AcquisitionProvider;
@@ -401,9 +398,9 @@ namespace Deucarian.TemplateViewerWeb
                 return false;
             }
 
-            if (!ViewerAuthenticationTargetRegistry.TryGet(
+            if (!AuthenticationTargetRegistry.TryGet(
                     connection.TargetId,
-                    out ViewerAuthenticationTarget target) ||
+                    out AuthenticationTarget target) ||
                 !ReferenceEquals(target.Session, connection.Session))
             {
                 return false;
@@ -571,14 +568,14 @@ namespace Deucarian.TemplateViewerWeb
             }
         }
 
-        private IViewerAuthenticationAcquisitionProvider
+        private IAuthenticationAcquisitionProvider
             CreateAuthenticationAcquisitionProvider(IApiClient apiClient)
         {
             SessionTokenEndpointProfile profile =
                 ResolvedAuthenticationTokenEndpointProfile;
             return profile == null
                 ? null
-                : ViewerAuthenticationEndpointProviderFactory.Create(
+                : AuthenticationEndpointProviderFactory.Create(
                     profile,
                     apiClient);
         }

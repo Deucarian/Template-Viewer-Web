@@ -18,7 +18,8 @@
     "Deucarian.ViewerNavigation",
     "Deucarian.ViewerRendering",
     "Deucarian.ViewerShell",
-    "Deucarian.ViewerAuthentication",
+    "Deucarian.Authentication",
+    "Deucarian.Authentication.ViewerIntegration",
     "UnityEngine.UIElementsModule",
     "Newtonsoft.Json"
   ],

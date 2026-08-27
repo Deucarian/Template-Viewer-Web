@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Deucarian.CommandRouting;
 using Deucarian.TemplateViewerWeb.Commands;
-using Deucarian.ViewerAuthentication;
+using Deucarian.Authentication;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
@@ -94,9 +94,9 @@ namespace Deucarian.TemplateViewerWeb.Tests
                 TimeSpan.Zero);
 
             await adapter.PublishAsync(
-                ViewerAuthenticationEventNames.AccessTokenUpdated,
-                new ViewerAuthenticationStatusSnapshot(
-                    ViewerAuthenticationStatus.Active,
+                AuthenticationEventNames.AccessTokenUpdated,
+                new AuthenticationStatusSnapshot(
+                    AuthenticationStatus.Active,
                     true,
                     true,
                     expiry),
@@ -104,7 +104,7 @@ namespace Deucarian.TemplateViewerWeb.Tests
 
             Assert.That(
                 publisher.EventName,
-                Is.EqualTo(ViewerAuthenticationEventNames.AccessTokenUpdated));
+                Is.EqualTo(AuthenticationEventNames.AccessTokenUpdated));
             Assert.That(
                 publisher.RemoteEndpoint,
                 Is.EqualTo("parent:https://host.example"));

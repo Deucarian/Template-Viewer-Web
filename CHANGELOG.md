@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.4.0] - 2026-08-26
+
+### Changed
+
+- Consume API 2.0 and the generic Authentication 1.0 package/assemblies.
+- Require token endpoint profiles to be assigned explicitly; the template no
+  longer loads a conventional package resource when configuration is absent.
+- Align the composed camera, command, diagnostics, logging, session API, and
+  viewer-navigation packages to their coordinated migration releases.
+
 ## [0.3.7] - 2026-08-26
 
 ### Added

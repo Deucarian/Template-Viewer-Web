@@ -7,7 +7,8 @@
     "Deucarian.CommandRouting.Editor",
     "Deucarian.WebGLTemplate.Editor",
     "Deucarian.TemplateViewerWeb",
-    "Deucarian.ViewerAuthentication",
+    "Deucarian.Authentication",
+    "Deucarian.Authentication.ViewerIntegration",
     "Newtonsoft.Json"
   ],
   "includePlatforms": [

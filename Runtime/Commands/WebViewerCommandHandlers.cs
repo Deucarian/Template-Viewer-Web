@@ -2,14 +2,14 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Deucarian.CommandRouting;
-using Deucarian.ViewerAuthentication;
+using Deucarian.Authentication;
 
 namespace Deucarian.TemplateViewerWeb.Commands
 {
     public static class WebViewerCommandHandlers
     {
         public static IReadOnlyList<ICommandHandler<WebViewerApplication>> Create(
-            IViewerAuthenticationEventPublisher authenticationEventPublisher = null,
+            IAuthenticationEventPublisher authenticationEventPublisher = null,
             bool includeGenericVisibilityCommands = true,
             ICommandHandler<WebViewerApplication> initializationHandler = null)
         {
@@ -17,7 +17,7 @@ namespace Deucarian.TemplateViewerWeb.Commands
             {
                 initializationHandler ?? new InitializeWebViewerCommandHandler(),
                 new DisposeWebViewerCommandHandler(),
-                new ViewerAuthenticationCommandHandler<WebViewerApplication>(
+                new AuthenticationCommandHandler<WebViewerApplication>(
                     authenticationEventPublisher)
             };
             if (includeGenericVisibilityCommands)

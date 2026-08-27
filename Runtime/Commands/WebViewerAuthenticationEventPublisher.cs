@@ -2,7 +2,7 @@ using System;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using Deucarian.ViewerAuthentication;
+using Deucarian.Authentication;
 using Newtonsoft.Json.Linq;
 
 namespace Deucarian.TemplateViewerWeb.Commands
@@ -12,7 +12,7 @@ namespace Deucarian.TemplateViewerWeb.Commands
     /// existing browser event publisher.
     /// </summary>
     public sealed class WebViewerAuthenticationEventPublisher :
-        IViewerAuthenticationEventPublisher
+        IAuthenticationEventPublisher
     {
         private readonly IWebViewerEventPublisher eventPublisher;
         private readonly string remoteEndpoint;
@@ -32,7 +32,7 @@ namespace Deucarian.TemplateViewerWeb.Commands
 
         public Task PublishAsync(
             string eventName,
-            ViewerAuthenticationStatusSnapshot status,
+            AuthenticationStatusSnapshot status,
             CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();

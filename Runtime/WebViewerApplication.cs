@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Deucarian.TemplateViewerWeb.Selection;
-using Deucarian.ViewerAuthentication;
+using Deucarian.Authentication;
 using Deucarian.ViewerNavigation;
 using Newtonsoft.Json.Linq;
 using UnityEngine;
@@ -12,14 +12,14 @@ namespace Deucarian.TemplateViewerWeb
 {
     public sealed class WebViewerApplication :
         IDisposable,
-        IViewerAuthenticationHost
+        IAuthenticationHost
     {
         private readonly IWebViewerModelDescriptorResolver descriptorResolver;
         private readonly IWebViewerModelLoader modelLoader;
         private readonly ViewerNavigationInstaller navigation;
         private readonly IWebViewerEventPublisher eventPublisher;
         private readonly GameObject embeddedModel;
-        private readonly IViewerAuthenticationSession authenticationSession;
+        private readonly IAuthenticationSession authenticationSession;
         private readonly IWebViewerVisibilityFeatureFactory
             visibilityFeatureFactory;
         private CancellationTokenSource initializationCancellation;
@@ -35,7 +35,7 @@ namespace Deucarian.TemplateViewerWeb
             ViewerNavigationInstaller navigationInstaller,
             IWebViewerEventPublisher publisher,
             GameObject embeddedReferenceModel = null,
-            IViewerAuthenticationSession viewerAuthentication = null,
+            IAuthenticationSession viewerAuthentication = null,
             IWebViewerVisibilityFeatureFactory customVisibilityFeatureFactory = null)
         {
             descriptorResolver = resolver ??
@@ -46,7 +46,7 @@ namespace Deucarian.TemplateViewerWeb
             eventPublisher = publisher ?? throw new ArgumentNullException(nameof(publisher));
             embeddedModel = embeddedReferenceModel;
             authenticationSession = viewerAuthentication ??
-                new ViewerAuthenticationSession();
+                new AuthenticationSession();
             visibilityFeatureFactory = customVisibilityFeatureFactory;
             Lifecycle = WebViewerLifecycleState.Created;
             if (embeddedModel != null)
@@ -67,7 +67,7 @@ namespace Deucarian.TemplateViewerWeb
         public int SelectedElementCount =>
             visibilityFeature?.SelectedElementCount ?? 0;
         public WebViewerModelContext CurrentModel { get; private set; }
-        public IViewerAuthenticationSession AuthenticationSession =>
+        public IAuthenticationSession AuthenticationSession =>
             authenticationSession;
 
         /// <summary>

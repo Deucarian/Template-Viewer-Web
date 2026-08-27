@@ -1,5 +1,5 @@
 using Deucarian.Diagnostics;
-using Deucarian.ViewerAuthentication;
+using Deucarian.Authentication;
 
 namespace Deucarian.TemplateViewerWeb.Diagnostics
 {
@@ -42,10 +42,10 @@ namespace Deucarian.TemplateViewerWeb.Diagnostics
                 "selected_elements",
                 "Selected elements",
                 (application?.SelectedElementCount ?? 0).ToString());
-            ViewerAuthenticationStatusSnapshot authentication =
+            AuthenticationStatusSnapshot authentication =
                 application?.AuthenticationSession?.Status ??
-                new ViewerAuthenticationStatusSnapshot(
-                    ViewerAuthenticationStatus.Missing,
+                new AuthenticationStatusSnapshot(
+                    AuthenticationStatus.Missing,
                     false,
                     false,
                     null);
@@ -57,17 +57,17 @@ namespace Deucarian.TemplateViewerWeb.Diagnostics
         }
 
         private static DiagnosticSeverity GetAuthenticationSeverity(
-            ViewerAuthenticationStatus status)
+            AuthenticationStatus status)
         {
             switch (status)
             {
-                case ViewerAuthenticationStatus.Active:
+                case AuthenticationStatus.Active:
                     return DiagnosticSeverity.Success;
-                case ViewerAuthenticationStatus.Expired:
+                case AuthenticationStatus.Expired:
                     return DiagnosticSeverity.Error;
-                case ViewerAuthenticationStatus.Expiring:
-                case ViewerAuthenticationStatus.ExpiryUnknown:
-                case ViewerAuthenticationStatus.Missing:
+                case AuthenticationStatus.Expiring:
+                case AuthenticationStatus.ExpiryUnknown:
+                case AuthenticationStatus.Missing:
                 default:
                     return DiagnosticSeverity.Warning;
             }
