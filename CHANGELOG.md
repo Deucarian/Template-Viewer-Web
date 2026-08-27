@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.5.4] - 2026-08-27
+
+### Fixed
+
+- Declared the Authentication viewer-integration assembly used by the Editor
+  command-catalog generator and its tests.
+
+## [0.5.3] - 2026-08-27
+
+### Changed
+
+- Updated the platform-neutral Viewer Template dependency to 0.2.0 so the Web
+  adapter consumes its generic Authentication-based composition contract.
+
+## [0.5.2] - 2026-08-27
+
+### Changed
+
+- Replaced the retired Viewer Authentication dependency and assembly reference
+  with generic `com.deucarian.authentication` 1.0.0 while preserving the
+  platform-neutral Viewer Template/Web adapter split introduced in 0.5.0.
+
 ## [0.5.1] - 2026-08-27
 
 ### Changed
@@ -26,7 +48,7 @@
 - Reject Web build scenes unless they contain exactly one `ViewerBootstrap`
   and that component is the Web adapter, preventing mixed platform
   compositions from shipping accidentally.
-- Declare the viewer-authentication dependency required by the editor command
+- Declare the authentication dependency required by the editor command
   catalog against the platform-neutral core API.
 
 ## [0.3.7] - 2026-08-26
