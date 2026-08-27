@@ -7,10 +7,11 @@ policies.
 
 ## Ownership
 
-This concrete template owns a generic viewer application composition root,
-generic example commands and visibility state, an Object Loading/API adapter,
-sanitized diagnostics, browser harness, sample scene, and project-owned WebGL
-Build Profile provider.
+This adapter owns the secure browser command/event transport, WebGL page
+lifecycle projection, browser harness, runnable Web sample, and project-owned
+WebGL Build Profile provider. The platform-neutral Template Viewer package owns
+the application composition, model loading, commands, visibility, diagnostics,
+authentication, navigation, rendering, and in-viewer shell.
 
 It must not own camera math, raw input, pointer capture, browser transport,
 generic command routing, AssetBundle loading internals, Report/Activity DTOs,
@@ -19,7 +20,7 @@ or backend-specific model/version lookup.
 ## Invariants
 
 - Selection changes element visibility only. It never invokes camera movement.
-- The application publishes `viewer_ready` only after the model, identifier
+- The shared application publishes `viewer_ready` only after the model, identifier
   index, navigation reference, and command host are ready.
 - Revisions are monotonic. Invalid or stale selection keeps the last valid state.
 - Reinitialization and disposal release prior loads and listeners idempotently.

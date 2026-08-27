@@ -4,9 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Deucarian.CommandRouting;
 using Deucarian.CommandRouting.WebGLIntegration;
+using Deucarian.TemplateViewer;
+using Deucarian.TemplateViewer.Commands;
+using Deucarian.TemplateViewer.Loading;
 using Deucarian.TemplateViewerWeb.Commands;
-using Deucarian.TemplateViewerWeb.Loading;
-using Deucarian.ViewerNavigation;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using UnityEngine;
@@ -27,7 +28,8 @@ namespace Deucarian.TemplateViewerWeb.Tests
 
                 Assert.That(result.Outcome.Result.ErrorCode,
                     Is.EqualTo("initialization_failed"));
-                Assert.That(result.Lifecycle, Is.EqualTo(WebViewerLifecycleState.Failed));
+                Assert.That(result.Lifecycle,
+                    Is.EqualTo(ViewerLifecycleState.Failed));
                 Assert.That(browser.Events, Has.Count.EqualTo(2));
                 Assert.That(browser.Events[0].Name, Is.EqualTo("viewer_loading"));
                 Assert.That(browser.Events[1].Name, Is.EqualTo("viewer_failed"));
@@ -48,7 +50,8 @@ namespace Deucarian.TemplateViewerWeb.Tests
 
                 Assert.That(result.Outcome.Result.ErrorCode,
                     Is.EqualTo("initialization_failed"));
-                Assert.That(result.Lifecycle, Is.EqualTo(WebViewerLifecycleState.Failed));
+                Assert.That(result.Lifecycle,
+                    Is.EqualTo(ViewerLifecycleState.Failed));
                 Assert.That(browser.Events, Is.Empty);
             }
         }
@@ -108,21 +111,20 @@ namespace Deucarian.TemplateViewerWeb.Tests
             string remoteEndpoint)
         {
             GameObject model = new GameObject("Embedded model");
-            GameObject navigationObject = new GameObject("Navigation");
             GameObject routeObject = new GameObject("Command route");
             try
             {
-                using (var application = new WebViewerApplication(
-                           new DirectWebViewerModelDescriptorResolver(),
+                using (var application = new ViewerApplication(
+                           new DirectViewerModelDescriptorResolver(),
                            new EmbeddedOnlyModelLoader(),
-                           navigationObject.AddComponent<ViewerNavigationInstaller>(),
+                           new RecordingReferenceNavigation(),
                            new WebGlWebViewerEventPublisher(transport),
                            model,
                            customVisibilityFeatureFactory:
                                new RejectingVisibilityFeatureFactory()))
-                using (var runtime = new CommandRoutingRuntime<WebViewerApplication>(
+                using (var runtime = new CommandRoutingRuntime<ViewerApplication>(
                            application,
-                           WebViewerCommandHandlers.Create()))
+                           ViewerCommandHandlers.Create()))
                 {
                     CommandRoutePortBehaviour port =
                         routeObject.AddComponent<CommandRoutePortBehaviour>();
@@ -139,7 +141,6 @@ namespace Deucarian.TemplateViewerWeb.Tests
             finally
             {
                 UnityEngine.Object.DestroyImmediate(routeObject);
-                UnityEngine.Object.DestroyImmediate(navigationObject);
                 UnityEngine.Object.DestroyImmediate(model);
             }
         }
@@ -163,22 +164,22 @@ namespace Deucarian.TemplateViewerWeb.Tests
         {
             public RoutedInitialization(
                 CommandRouteOutcome outcome,
-                WebViewerLifecycleState lifecycle)
+                ViewerLifecycleState lifecycle)
             {
                 Outcome = outcome;
                 Lifecycle = lifecycle;
             }
 
             public CommandRouteOutcome Outcome { get; }
-            public WebViewerLifecycleState Lifecycle { get; }
+            public ViewerLifecycleState Lifecycle { get; }
         }
 
         private sealed class RejectingVisibilityFeatureFactory :
-            IWebViewerVisibilityFeatureFactory
+            IViewerVisibilityFeatureFactory
         {
             public bool TryCreate(
-                WebViewerModelContext context,
-                out IWebViewerVisibilityFeature feature,
+                ViewerModelContext context,
+                out IViewerVisibilityFeature feature,
                 out string error)
             {
                 feature = null;
@@ -187,10 +188,10 @@ namespace Deucarian.TemplateViewerWeb.Tests
             }
         }
 
-        private sealed class EmbeddedOnlyModelLoader : IWebViewerModelLoader
+        private sealed class EmbeddedOnlyModelLoader : IViewerModelLoader
         {
-            public Task<WebViewerModelLoadResult> LoadAsync(
-                WebViewerModelDescriptor descriptor,
+            public Task<ViewerModelLoadResult> LoadAsync(
+                ViewerModelDescriptor descriptor,
                 CancellationToken cancellationToken) =>
                 throw new InvalidOperationException(
                     "Embedded initialization must not invoke the model loader.");
@@ -202,6 +203,19 @@ namespace Deucarian.TemplateViewerWeb.Tests
             public void Dispose()
             {
             }
+        }
+
+        private sealed class RecordingReferenceNavigation :
+            IViewerReferenceNavigation
+        {
+            public void BeginReferenceLoad()
+            {
+            }
+
+            public bool RegisterReference(
+                GameObject referenceRoot,
+                bool frame,
+                bool captureOrigin) => true;
         }
 
         private readonly struct PublishedEvent

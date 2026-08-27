@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Deucarian.CommandRouting.Editor;
-using Deucarian.TemplateViewerWeb.Commands;
+using Deucarian.TemplateViewer.Commands;
 using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
@@ -54,7 +54,7 @@ namespace Deucarian.TemplateViewerWeb.Editor
 
             try
             {
-                WebViewerCommandHarnessCatalog catalog =
+                ViewerCommandHarnessCatalog catalog =
                     WebViewerCommandHarnessCatalogGenerator.CreateCatalog(
                         sceneBootstraps[0]);
                 WebViewerBootstrap bootstrap = sceneBootstraps[0];
