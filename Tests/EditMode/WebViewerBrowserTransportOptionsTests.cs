@@ -50,12 +50,39 @@ namespace Deucarian.TemplateViewerWeb.Tests
         [Test]
         public void EmbeddedBrowserFailsClosedWithoutDeploymentOrigin()
         {
-            Assert.Throws<ArgumentException>(() =>
+            InvalidOperationException exception =
+                Assert.Throws<InvalidOperationException>(() =>
                 WebViewerBrowserTransportOptions.Create(
                     "activity-viewer",
                     false,
                     "http://localhost:8080",
                     new EmbeddingContext(true, string.Empty)));
+
+            Assert.That(
+                exception.Message,
+                Does.Contain("Configure the host page"));
+            Assert.That(exception.Message, Does.Not.Contain("localhost"));
+        }
+
+        [Test]
+        public void ExplicitSceneIframeExplainsHowToFixMissingOrigin()
+        {
+            InvalidOperationException exception =
+                Assert.Throws<InvalidOperationException>(() =>
+                    WebViewerBrowserTransportOptions.Create(
+                        "report-viewer",
+                        true,
+                        string.Empty,
+                        new EmbeddingContext(false, string.Empty)));
+
+            Assert.That(
+                exception.Message,
+                Does.Contain("Web Viewer Bootstrap"));
+            Assert.That(exception.Message, Does.Contain("Iframe Mode"));
+            Assert.That(exception.Message, Does.Contain("Parent Origin"));
+            Assert.That(
+                exception.Message,
+                Does.Contain("disable Iframe Mode"));
         }
 
         [Test]

@@ -62,6 +62,30 @@ namespace Deucarian.TemplateViewerWeb
             string origin = browserIframe
                 ? embeddingContext.GetConfiguredParentOrigin()
                 : configuredParentOrigin;
+
+            if (!WebViewerPlatformConfiguration.TryValidate(
+                    true,
+                    origin,
+                    false,
+                    out _))
+            {
+                if (browserIframe)
+                {
+                    throw new InvalidOperationException(
+                        "Embedded Web Viewer startup requires a valid " +
+                        "deployment parent origin. Configure the host page " +
+                        "to provide one exact HTTP(S) parent origin before " +
+                        "loading Unity.");
+                }
+
+                throw new InvalidOperationException(
+                    "Web Viewer Bootstrap has Iframe Mode enabled, but " +
+                    "Parent Origin is empty or invalid. For local Unity " +
+                    "Play Mode, disable Iframe Mode. To test iframe mode " +
+                    "locally, set Parent Origin to one exact HTTP(S) " +
+                    "origin.");
+            }
+
             return new WebGlCommandTransportOptions(
                 transportId,
                 WebGlCommandTransportMode.ParentIframe,

@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.5] - 2026-08-28
+
+### Fixed
+
+- Replaced opaque iframe transport constructor failures with safe, actionable
+  guidance that names the Web Viewer Bootstrap settings to correct for local
+  Play Mode and embedded deployments.
+- Updated the platform-neutral Viewer Template dependency to 0.2.1 for staged,
+  actionable composition diagnostics.
+
 ## [0.5.4] - 2026-08-27
 
 ### Fixed
