@@ -10,9 +10,6 @@ on:
 jobs:
   validate:
     name: Shared package validation
-    # Coordinated migration pin. Restore to @develop after the matching
-    # Package Registry migration has merged.
-    uses: Deucarian/Package-Registry/.github/workflows/deucarian-package-validation.yml@codex/platform-package-registry
+    uses: Deucarian/Package-Registry/.github/workflows/deucarian-package-validation.yml@develop
     with:
       package-config: deucarian-package.json
-      registry-ref: codex/platform-package-registry
