@@ -1,22 +1,20 @@
-# Generic browser protocol
+# Browser protocol
 
-The transport wire format is owned by Command Routing WebGL Integration. This
-template adds only application command names and payload schemas.
+Command envelopes and viewer command/event payloads are owned by Command
+Routing and the platform-neutral Template Viewer core. This adapter preserves
+their wire format and adds no product-specific DTOs.
 
-`initialize_viewer` accepts a complete model context rather than arbitrary
-patches. A missing `model_url` selects the embedded sample model. Applications
-should replace the descriptor resolver to turn their model context into an
-exact source/version.
+Direct-page hosts use the `direct` endpoint. Iframe hosts use
+`parent:<exact-origin>`, where the exact origin is supplied through
+`window.deucarianWebViewerConfig.parentOrigin` before Unity starts. The same
+endpoint is used for inbound commands, command responses, application events,
+and authentication lifecycle events.
 
-`select_elements` is the example visibility command. IDs must be unique,
-stable, and registered by `WebViewerElement`. Unknown IDs fail without clearing
-or altering the last valid state. Each successful change emits its applied
-revision. There is no camera command in the selection path.
+Transport readiness means that the browser listener is installed. Hosts must
+still wait for the core application's `viewer_ready` event before assuming the
+model, identifier index, reference navigation, and command composition are
+ready. Product packages may publish additional readiness events after that
+point when their own metadata is asynchronous.
 
-Iframe hosts must set
-`window.deucarianWebViewerConfig.parentOrigin` to their one exact origin before
-the Unity loader starts, then send to the viewer iframe's `contentWindow` using
-that same origin. Hosts queue application commands until the application's
-`viewer_ready` event and resend current context/state after a viewer
-recreation. Product readiness events may deliberately follow `viewer_ready`
-when product metadata is asynchronous.
+An invalid or absent deployment origin in an actual iframe fails closed. The
+adapter validates the parent source window and never uses wildcard origins.

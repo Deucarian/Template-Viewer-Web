@@ -45,7 +45,8 @@ The generator reads the same handler composition used by
 `WebViewerBootstrap`. Every registered command therefore receives a manual
 action without maintaining a second command-name list. Generic commands have
 safe representative payloads and automated expectations. A
-`WebViewerFeatureBehaviour` can override `CreateCommandHarnessScenarios()` to
+`Deucarian.TemplateViewer.ViewerFeatureBehaviour` can override
+`CreateCommandHarnessScenarios()` to
 add valid product examples. Commands without an example remain visible but do
 not join the automated run.
 

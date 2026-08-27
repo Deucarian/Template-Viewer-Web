@@ -5,10 +5,10 @@
     "Deucarian.BuildPipeline.Editor",
     "Deucarian.CommandRouting",
     "Deucarian.CommandRouting.Editor",
+    "Deucarian.TemplateViewer",
+    "Deucarian.Authentication",
     "Deucarian.WebGLTemplate.Editor",
     "Deucarian.TemplateViewerWeb",
-    "Deucarian.Authentication",
-    "Deucarian.Authentication.ViewerIntegration",
     "Newtonsoft.Json"
   ],
   "includePlatforms": [

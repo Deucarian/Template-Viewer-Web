@@ -1,14 +1,33 @@
 # Changelog
 
-## [0.4.0] - 2026-08-26
+## [0.5.1] - 2026-08-27
 
 ### Changed
 
-- Consume API 2.0 and the generic Authentication 1.0 package/assemblies.
-- Require token endpoint profiles to be assigned explicitly; the template no
-  longer loads a conventional package resource when configuration is absent.
-- Align the composed camera, command, diagnostics, logging, session API, and
-  viewer-navigation packages to their coordinated migration releases.
+- Replaced the retired Viewer Authentication dependency and assembly reference
+  with generic `com.deucarian.authentication` 1.0.0 while preserving the
+  platform-neutral Viewer Template/Web adapter split introduced in 0.5.0.
+
+## [0.5.0] - 2026-08-26
+
+### Changed
+
+- Converted the package into a thin WebGL adapter for
+  `com.deucarian.template.viewer` 0.1.0.
+- Kept the existing `WebViewerBootstrap` component and Unity asset identity so
+  imported scenes continue to deserialize while shared application behavior
+  moves to the platform-neutral core.
+- Limited runtime ownership to secure browser command/event transport and
+  WebGL page lifecycle projection; the browser harness, Web build provider,
+  generated command catalog, and runnable sample remain available.
+- Restricted the adapter runtime and sample assemblies to Editor and WebGL so
+  the same Unity project can install other platform adapters without pulling
+  browser runtime code into desktop or XR players.
+- Reject Web build scenes unless they contain exactly one `ViewerBootstrap`
+  and that component is the Web adapter, preventing mixed platform
+  compositions from shipping accidentally.
+- Declare the authentication dependency required by the editor command
+  catalog against the platform-neutral core API.
 
 ## [0.3.7] - 2026-08-26
 
