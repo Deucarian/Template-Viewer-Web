@@ -15,3 +15,4 @@ jobs:
     uses: Deucarian/Package-Registry/.github/workflows/deucarian-package-validation.yml@codex/platform-package-registry
     with:
       package-config: deucarian-package.json
+      registry-ref: codex/platform-package-registry
