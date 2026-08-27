@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Deucarian.BuildPipeline;
+using Deucarian.TemplateViewer;
 using Deucarian.WebGLTemplate.Editor;
 using UnityEditor;
 using UnityEditor.Build.Profile;
@@ -165,17 +166,9 @@ namespace Deucarian.TemplateViewerWeb.Editor
 
             try
             {
-                WebViewerBootstrap bootstrap = FindBootstrap(scene);
-                if (bootstrap == null)
-                {
-                    result.Add("The viewer scene has no WebViewerBootstrap.");
-                }
-                else if (!bootstrap.TryValidateConfiguration(
-                             environment == DeucarianBuildEnvironment.Production,
-                             out string issue))
-                {
-                    result.Add(issue);
-                }
+                result.AddRange(ValidateViewerComposition(
+                    FindViewerBootstraps(scene),
+                    environment == DeucarianBuildEnvironment.Production));
             }
             finally
             {
@@ -188,20 +181,64 @@ namespace Deucarian.TemplateViewerWeb.Editor
             return result;
         }
 
-        private static WebViewerBootstrap FindBootstrap(Scene scene)
+        internal static IReadOnlyList<string> ValidateViewerComposition(
+            IReadOnlyList<ViewerBootstrap> bootstraps,
+            bool production)
         {
+            int count = bootstraps?.Count ?? 0;
+            if (count == 0)
+            {
+                return new[]
+                {
+                    "The viewer scene has no ViewerBootstrap."
+                };
+            }
+
+            if (count != 1)
+            {
+                return new[]
+                {
+                    "The viewer scene contains " + count +
+                    " ViewerBootstrap components; exactly one platform " +
+                    "adapter is required."
+                };
+            }
+
+            if (!(bootstraps[0] is WebViewerBootstrap webBootstrap))
+            {
+                return new[]
+                {
+                    "A Web Viewer build requires WebViewerBootstrap as its " +
+                    "only ViewerBootstrap."
+                };
+            }
+
+            return webBootstrap.TryValidateConfiguration(
+                production,
+                out string issue)
+                ? Array.Empty<string>()
+                : new[] { issue };
+        }
+
+        private static IReadOnlyList<ViewerBootstrap> FindViewerBootstraps(
+            Scene scene)
+        {
+            var bootstraps = new List<ViewerBootstrap>();
             GameObject[] roots = scene.GetRootGameObjects();
             for (int i = 0; i < roots.Length; i++)
             {
-                WebViewerBootstrap bootstrap =
-                    roots[i].GetComponentInChildren<WebViewerBootstrap>(true);
-                if (bootstrap != null)
+                ViewerBootstrap[] rootBootstraps =
+                    roots[i].GetComponentsInChildren<ViewerBootstrap>(true);
+                for (int j = 0; j < rootBootstraps.Length; j++)
                 {
-                    return bootstrap;
+                    if (rootBootstraps[j] != null)
+                    {
+                        bootstraps.Add(rootBootstraps[j]);
+                    }
                 }
             }
 
-            return null;
+            return bootstraps;
         }
 
         private static void EnsureAssetFolder(string assetPath)

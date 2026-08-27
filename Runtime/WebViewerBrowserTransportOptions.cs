@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using Deucarian.CommandRouting.WebGLIntegration;
 
@@ -66,6 +67,49 @@ namespace Deucarian.TemplateViewerWeb
                 WebGlCommandTransportMode.ParentIframe,
                 new[] { origin },
                 origin);
+        }
+    }
+
+    public static class WebViewerPlatformConfiguration
+    {
+        public static bool TryValidate(
+            bool iframeMode,
+            string parentOrigin,
+            bool production,
+            out string issue)
+        {
+            if (!iframeMode)
+            {
+                issue = string.Empty;
+                return true;
+            }
+
+            if (!Uri.TryCreate(
+                    parentOrigin,
+                    UriKind.Absolute,
+                    out Uri origin) ||
+                (origin.Scheme != Uri.UriSchemeHttp &&
+                 origin.Scheme != Uri.UriSchemeHttps) ||
+                origin.AbsolutePath != "/" ||
+                !string.IsNullOrEmpty(origin.Query) ||
+                !string.IsNullOrEmpty(origin.Fragment) ||
+                !string.IsNullOrEmpty(origin.UserInfo))
+            {
+                issue =
+                    "Iframe mode requires an exact HTTP(S) parent origin.";
+                return false;
+            }
+
+            if (production &&
+                (origin.Scheme != Uri.UriSchemeHttps || origin.IsLoopback))
+            {
+                issue = "Production iframe mode requires an exact " +
+                        "non-loopback HTTPS origin.";
+                return false;
+            }
+
+            issue = string.Empty;
+            return true;
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using Deucarian.CommandRouting.WebGLIntegration;
+using Deucarian.TemplateViewer;
 using NUnit.Framework;
 
 namespace Deucarian.TemplateViewerWeb.Tests
@@ -73,6 +74,36 @@ namespace Deucarian.TemplateViewerWeb.Tests
             Assert.That(
                 options.TargetOrigin,
                 Is.EqualTo("http://localhost:8080"));
+        }
+
+        [Test]
+        public void ProductionIframeRequiresSecureNonLoopbackOrigin()
+        {
+            Assert.That(
+                WebViewerPlatformConfiguration.TryValidate(
+                    true,
+                    "http://localhost:8080",
+                    true,
+                    out string issue),
+                Is.False);
+            Assert.That(issue, Does.Contain("non-loopback HTTPS"));
+
+            Assert.That(
+                WebViewerPlatformConfiguration.TryValidate(
+                    true,
+                    "https://backoffice.example",
+                    true,
+                    out issue),
+                Is.True,
+                issue);
+        }
+
+        [Test]
+        public void BootstrapIsAThinGenericViewerHost()
+        {
+            Assert.That(
+                typeof(WebViewerBootstrap).BaseType,
+                Is.EqualTo(typeof(ViewerBootstrap)));
         }
 
         private sealed class EmbeddingContext :

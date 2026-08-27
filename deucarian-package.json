@@ -1,6 +1,6 @@
 {
   "packageId": "com.deucarian.template.viewer.web",
-  "displayName": "Deucarian Web Viewer Template",
+  "displayName": "Deucarian Web Viewer Adapter",
   "samplePolicy": "playable-scene",
   "operationalPackage": true,
   "ownedCapabilities": [],
@@ -14,31 +14,17 @@
     "Deucarian.TemplateViewerWeb.Samples.WebViewer"
   ],
   "testAssemblies": [
-    "Deucarian.TemplateViewerWeb.Tests.EditMode",
-    "Deucarian.TemplateViewerWeb.Tests.PlayMode"
+    "Deucarian.TemplateViewerWeb.Tests.EditMode"
   ],
   "requiredDependencies": [
-    "com.deucarian.api",
     "com.deucarian.build-pipeline",
-    "com.deucarian.camera-navigation",
     "com.deucarian.command-routing",
     "com.deucarian.command-routing.webgl-integration",
     "com.deucarian.diagnostics",
-    "com.deucarian.logging",
-    "com.deucarian.object-loading",
-    "com.deucarian.object-loading.api-integration",
-    "com.deucarian.session",
-    "com.deucarian.session.api-integration",
-    "com.deucarian.theming",
-    "com.deucarian.ui",
-    "com.deucarian.viewer-navigation",
-    "com.deucarian.viewer-rendering",
-    "com.deucarian.viewer-shell",
+    "com.deucarian.template.viewer",
     "com.deucarian.viewer-authentication",
-    "com.deucarian.web-viewer-suite",
     "com.deucarian.webgl-template",
-    "com.unity.nuget.newtonsoft-json",
-    "com.unity.modules.uielements"
+    "com.unity.nuget.newtonsoft-json"
   ],
   "optionalVersionDefinedDependencies": [],
   "allowedDirectDebugCalls": [],

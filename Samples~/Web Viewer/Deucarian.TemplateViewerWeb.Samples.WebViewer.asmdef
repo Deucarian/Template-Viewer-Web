@@ -2,9 +2,13 @@
   "name": "Deucarian.TemplateViewerWeb.Samples.WebViewer",
   "rootNamespace": "Deucarian.TemplateViewerWeb.Samples.WebViewer",
   "references": [
+    "Deucarian.TemplateViewer",
     "Deucarian.TemplateViewerWeb"
   ],
-  "includePlatforms": [],
+  "includePlatforms": [
+    "Editor",
+    "WebGL"
+  ],
   "excludePlatforms": [],
   "allowUnsafeCode": false,
   "overrideReferences": false,
