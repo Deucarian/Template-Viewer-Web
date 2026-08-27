@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.4] - 2026-08-27
+
+### Fixed
+
+- Declared the Authentication viewer-integration assembly used by the Editor
+  command-catalog generator and its tests.
+
 ## [0.5.3] - 2026-08-27
 
 ### Changed
