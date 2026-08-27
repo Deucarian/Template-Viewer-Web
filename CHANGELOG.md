@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.3] - 2026-08-27
+
+### Changed
+
+- Updated the platform-neutral Viewer Template dependency to 0.2.0 so the Web
+  adapter consumes its generic Authentication-based composition contract.
+
 ## [0.5.2] - 2026-08-27
 
 ### Changed
