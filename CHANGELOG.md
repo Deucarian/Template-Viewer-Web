@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.1] - 2026-08-27
+
+### Changed
+
+- Updated the platform-neutral viewer core dependency to 0.1.1 so Web
+  products can complete product-owned model preparation before
+  `viewer_ready` without moving that behavior into the browser adapter.
+
 ## [0.5.0] - 2026-08-26
 
 ### Changed
