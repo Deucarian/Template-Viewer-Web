@@ -39,7 +39,7 @@ namespace Deucarian.TemplateViewerWeb.Tests
             ViewerCommandHarnessCatalog catalog =
                 WebViewerCommandHarnessCatalogGenerator.CreateCatalog(
                     bootstrap);
-            string[] registered = ViewerCommandHandlers.Create()
+            string[] registered = ViewerCommandHandlers.CreateDefault()
                 .SelectMany(handler => handler.CommandNames)
                 .OrderBy(value => value, StringComparer.Ordinal)
                 .ToArray();
@@ -76,13 +76,39 @@ namespace Deucarian.TemplateViewerWeb.Tests
                 "Browser~",
                 "commands.generated.json");
             JToken checkedIn = JToken.Parse(File.ReadAllText(path));
-            JToken expected = JToken.FromObject(generated);
+            JToken expected = JToken.Parse(
+                WebViewerCommandHarnessCatalogGenerator.Serialize(
+                    generated,
+                    WebViewerCommandHarnessCatalogGenerator
+                        .DefaultTransportId));
 
             Assert.That(
                 JToken.DeepEquals(checkedIn, expected),
                 Is.True,
                 "Regenerate Browser~/commands.generated.json from the Unity " +
                 "command composition.");
+        }
+
+        [TestCase("activity-viewer")]
+        [TestCase("report-viewer")]
+        public void SerializedProductCatalogCarriesExactTransportId(
+            string transportId)
+        {
+            root = new GameObject("Product Transport Catalog");
+            WebViewerBootstrap bootstrap =
+                root.AddComponent<WebViewerBootstrap>();
+            ViewerCommandHarnessCatalog catalog =
+                WebViewerCommandHarnessCatalogGenerator.CreateCatalog(
+                    bootstrap);
+
+            JObject serialized = JObject.Parse(
+                WebViewerCommandHarnessCatalogGenerator.Serialize(
+                    catalog,
+                    transportId));
+
+            Assert.That(
+                serialized.Value<string>("transport_id"),
+                Is.EqualTo(transportId));
         }
 
         [Test]
@@ -115,6 +141,36 @@ namespace Deucarian.TemplateViewerWeb.Tests
                 orderedScenarios.IndexOf(scenario),
                 Is.LessThan(orderedScenarios.FindIndex(
                     value => value.Id == "dispose")));
+        }
+
+        [Test]
+        public void ExplicitRemoteFeatureUsesTheRuntimeCompositionCatalog()
+        {
+            root = new GameObject("Remote Product Harness Catalog");
+            WebViewerBootstrap bootstrap =
+                root.AddComponent<WebViewerBootstrap>();
+            var featureObject = new GameObject("Remote Product Feature");
+            featureObject.transform.SetParent(root.transform);
+            HarnessFeature feature =
+                featureObject.AddComponent<HarnessFeature>();
+            var serialized = new UnityEditor.SerializedObject(bootstrap);
+            UnityEditor.SerializedProperty explicitFeatures =
+                serialized.FindProperty("explicitFeatureBehaviours");
+            explicitFeatures.arraySize = 1;
+            explicitFeatures.GetArrayElementAtIndex(0).objectReferenceValue =
+                feature;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+
+            ViewerCommandHarnessCatalog catalog =
+                WebViewerCommandHarnessCatalogGenerator.CreateCatalog(
+                    bootstrap);
+
+            Assert.That(
+                catalog.Scenarios.Select(value => value.CommandName),
+                Does.Contain("set_focus"));
+            Assert.That(
+                catalog.Scenarios.Select(value => value.CommandName),
+                Does.Not.Contain("select_elements"));
         }
 
         [Test]

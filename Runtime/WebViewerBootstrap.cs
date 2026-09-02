@@ -21,6 +21,8 @@ namespace Deucarian.TemplateViewerWeb
         public string ParentOrigin => parentOrigin;
         public string TransportId => transportId;
 
+        protected override bool EnableModelRevealReadiness => true;
+
         public bool TryValidateConfiguration(
             bool production,
             out string issue) =>

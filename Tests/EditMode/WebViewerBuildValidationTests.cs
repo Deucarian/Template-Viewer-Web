@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Deucarian.TemplateViewer;
 using Deucarian.TemplateViewerWeb.Editor;
 using NUnit.Framework;
+using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace Deucarian.TemplateViewerWeb.Tests
@@ -48,6 +50,24 @@ namespace Deucarian.TemplateViewerWeb.Tests
 
             Assert.That(issues.Count, Is.EqualTo(1));
             Assert.That(issues[0], Does.Contain("no ViewerBootstrap"));
+        }
+
+        [Test]
+        public void ReadmeUsesGovernedControlCenterNavigation()
+        {
+            PackageInfo package = PackageInfo.FindForAssembly(
+                typeof(WebViewerBootstrap).Assembly);
+            string readme = File.ReadAllText(Path.Combine(
+                package.resolvedPath,
+                "README.md"));
+
+            Assert.That(
+                readme,
+                Does.Contain("Tools > Deucarian > Control Center..."));
+            Assert.That(
+                readme,
+                Does.Not.Contain(
+                    "Tools > Deucarian > Communication > Command Routing"));
         }
 
         [Test]

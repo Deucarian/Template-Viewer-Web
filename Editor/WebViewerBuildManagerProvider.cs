@@ -1,269 +1,106 @@
 using System;
 using System.Collections.Generic;
 using Deucarian.BuildPipeline;
-using Deucarian.TemplateViewer;
-using Deucarian.WebGLTemplate.Editor;
-using UnityEditor;
-using UnityEditor.Build.Profile;
-using UnityEditor.SceneManagement;
-using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEditor.Build;
 
 namespace Deucarian.TemplateViewerWeb.Editor
 {
+    /// <summary>
+    /// One package-owned browser viewer workflow. A project definition selects
+    /// the real product scene; installations without one retain the runnable
+    /// generic sample workflow for backward compatibility.
+    /// </summary>
     public sealed class WebViewerBuildManagerProvider :
         IDeucarianBuildManagerProvider
     {
         public const string DevelopmentProfilePath =
-            "Assets/Deucarian/WebViewer/BuildProfiles/WebViewer-Development.asset";
+            WebViewerProductBuildWorkflow.DevelopmentProfilePath;
         public const string ProductionProfilePath =
-            "Assets/Deucarian/WebViewer/BuildProfiles/WebViewer-Production.asset";
+            WebViewerProductBuildWorkflow.ProductionProfilePath;
         public const string DevelopmentScenePath =
-            "Assets/Deucarian/WebViewer/Scenes/WebViewer-Development.unity";
+            WebViewerFallbackBuildWorkflow.DevelopmentScenePath;
         public const string ProductionScenePath =
-            "Assets/Deucarian/WebViewer/Scenes/WebViewer-Production.unity";
+            WebViewerFallbackBuildWorkflow.ProductionScenePath;
 
-        public string Id => "template-viewer-web";
-        public string DisplayName => "Web Viewer Template";
+        public string Id => TryReadDefinitionIdentity(
+            definition => definition.ProviderId,
+            "template-viewer-web");
+
+        public string DisplayName => TryReadDefinitionIdentity(
+            definition => definition.DisplayName,
+            "Web Viewer Template");
+
         public int Order => 300;
+
         public bool CanSynchronize => true;
 
         public IReadOnlyList<DeucarianBuildManagerTarget> GetTargets()
         {
-            return new[]
-            {
-                CreateTarget(
-                    "development",
-                    "Web Viewer - Development",
-                    DevelopmentProfilePath,
-                    DevelopmentScenePath,
-                    DeucarianBuildEnvironment.Development,
-                    "Builds/WebViewer-Development"),
-                CreateTarget(
-                    "production",
-                    "Web Viewer - Production",
-                    ProductionProfilePath,
-                    ProductionScenePath,
-                    DeucarianBuildEnvironment.Production,
-                    "Builds/WebViewer-Production")
-            };
+            WebViewerProductBuildConfiguration.TryLoad(
+                out WebViewerProductBuildConfiguration configuration,
+                out DeucarianBuildValidationResult validation);
+            return SelectTargets(configuration, validation);
         }
 
         public void Synchronize()
         {
-            DeucarianWebGLTemplate.Synchronize();
-            EnsureScene(
-                DevelopmentScenePath,
-                iframeMode: true,
-                parentOrigin: "http://localhost:8080");
-            EnsureScene(
-                ProductionScenePath,
-                iframeMode: false,
-                parentOrigin: string.Empty);
-            SynchronizeProfile(
-                DevelopmentProfilePath,
-                DevelopmentScenePath,
-                DeucarianBuildEnvironment.Development);
-            SynchronizeProfile(
-                ProductionProfilePath,
-                ProductionScenePath,
-                DeucarianBuildEnvironment.Production);
-            WebViewerCommandHarnessCatalogGenerator.GenerateForScene(
-                DevelopmentScenePath);
-        }
-
-        private static DeucarianBuildManagerTarget CreateTarget(
-            string id,
-            string displayName,
-            string profilePath,
-            string scenePath,
-            DeucarianBuildEnvironment environment,
-            string outputPath)
-        {
-            return new DeucarianBuildManagerTarget(
-                id,
-                displayName,
-                "Builds the generic browser-hosted viewer through a project-owned WebGL Build Profile.",
-                profilePath,
-                environment,
-                outputPath,
-                invocation => DeucarianBuildRunner.Build(
-                    new DeucarianBuildRequest(
-                        invocation.BuildProfile,
-                        environment,
-                        invocation.OutputPath,
-                        invocation.AdditionalBuildOptions)),
-                () => ValidateScene(profilePath, scenePath, environment));
-        }
-
-        private static void SynchronizeProfile(
-            string profilePath,
-            string scenePath,
-            DeucarianBuildEnvironment environment)
-        {
-            BuildProfile profile = DeucarianBuildProfileUtility.CreateProfile(
-                BuildTarget.WebGL,
-                profilePath);
-            DeucarianBuildProfileUtility.ApplySceneOverride(
-                profile,
-                new EditorBuildSettingsScene(scenePath, true));
-            DeucarianBuildRunner.ApplyPolicy(profile, environment);
-            DeucarianWebGLTemplate.ApplyTo(profile);
-        }
-
-        private static void EnsureScene(
-            string scenePath,
-            bool iframeMode,
-            string parentOrigin)
-        {
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath) != null)
+            if (WebViewerProductBuildConfiguration.TryLoad(
+                    out WebViewerProductBuildConfiguration configuration,
+                    out DeucarianBuildValidationResult validation))
             {
+                WebViewerProductBuildWorkflow.Synchronize(configuration);
                 return;
             }
 
-            EnsureAssetFolder(scenePath);
-            Scene scene = EditorSceneManager.NewScene(
-                NewSceneSetup.EmptyScene,
-                NewSceneMode.Additive);
-            try
+            if (!validation.IsValid)
             {
-                GameObject root = new GameObject("Web Viewer Bootstrap");
-                SceneManager.MoveGameObjectToScene(root, scene);
-                WebViewerBootstrap bootstrap = root.AddComponent<WebViewerBootstrap>();
-                SerializedObject serialized = new SerializedObject(bootstrap);
-                serialized.FindProperty("iframeMode").boolValue = iframeMode;
-                serialized.FindProperty("parentOrigin").stringValue = parentOrigin;
-                serialized.ApplyModifiedPropertiesWithoutUndo();
-                EditorSceneManager.SaveScene(scene, scenePath);
-            }
-            finally
-            {
-                EditorSceneManager.CloseScene(scene, true);
-            }
-        }
-
-        private static DeucarianBuildValidationResult ValidateScene(
-            string profilePath,
-            string scenePath,
-            DeucarianBuildEnvironment environment)
-        {
-            var result = new DeucarianBuildValidationResult();
-            BuildProfile profile =
-                AssetDatabase.LoadAssetAtPath<BuildProfile>(profilePath);
-            result.AddRange(DeucarianWebGLTemplate.Validate(profile).Issues);
-            if (AssetDatabase.LoadAssetAtPath<SceneAsset>(scenePath) == null)
-            {
-                result.Add("The project-owned viewer scene is missing: " + scenePath + ".");
-                return result;
+                throw new BuildFailedException(validation.Format(
+                    "Web Viewer product definition"));
             }
 
-            Scene scene = SceneManager.GetSceneByPath(scenePath);
-            bool openedForValidation = !scene.IsValid() || !scene.isLoaded;
-            if (openedForValidation)
-            {
-                scene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
-            }
-
-            try
-            {
-                result.AddRange(ValidateViewerComposition(
-                    FindViewerBootstraps(scene),
-                    environment == DeucarianBuildEnvironment.Production));
-            }
-            finally
-            {
-                if (openedForValidation && scene.IsValid())
-                {
-                    EditorSceneManager.CloseScene(scene, true);
-                }
-            }
-
-            return result;
+            WebViewerFallbackBuildWorkflow.Synchronize();
         }
 
         internal static IReadOnlyList<string> ValidateViewerComposition(
-            IReadOnlyList<ViewerBootstrap> bootstraps,
-            bool production)
+            IReadOnlyList<Deucarian.TemplateViewer.ViewerBootstrap> bootstraps,
+            bool production) =>
+            WebViewerSceneUtility.ValidateViewerComposition(
+                bootstraps,
+                production);
+
+        internal static IReadOnlyList<DeucarianBuildManagerTarget>
+            SelectTargets(
+                WebViewerProductBuildConfiguration configuration,
+                DeucarianBuildValidationResult validation)
         {
-            int count = bootstraps?.Count ?? 0;
-            if (count == 0)
+            if (configuration != null &&
+                (validation == null || validation.IsValid))
             {
-                return new[]
-                {
-                    "The viewer scene has no ViewerBootstrap."
-                };
+                return WebViewerProductBuildWorkflow.CreateTargets(
+                    configuration);
             }
 
-            if (count != 1)
+            if (validation != null && !validation.IsValid)
             {
-                return new[]
-                {
-                    "The viewer scene contains " + count +
-                    " ViewerBootstrap components; exactly one platform " +
-                    "adapter is required."
-                };
+                throw new BuildFailedException(validation.Format(
+                    "Web Viewer product definition"));
             }
 
-            if (!(bootstraps[0] is WebViewerBootstrap webBootstrap))
-            {
-                return new[]
-                {
-                    "A Web Viewer build requires WebViewerBootstrap as its " +
-                    "only ViewerBootstrap."
-                };
-            }
-
-            return webBootstrap.TryValidateConfiguration(
-                production,
-                out string issue)
-                ? Array.Empty<string>()
-                : new[] { issue };
+            return WebViewerFallbackBuildWorkflow.CreateTargets();
         }
 
-        private static IReadOnlyList<ViewerBootstrap> FindViewerBootstraps(
-            Scene scene)
+        private static string TryReadDefinitionIdentity(
+            Func<WebViewerProductBuildDefinition, string> selector,
+            string fallback)
         {
-            var bootstraps = new List<ViewerBootstrap>();
-            GameObject[] roots = scene.GetRootGameObjects();
-            for (int i = 0; i < roots.Length; i++)
-            {
-                ViewerBootstrap[] rootBootstraps =
-                    roots[i].GetComponentsInChildren<ViewerBootstrap>(true);
-                for (int j = 0; j < rootBootstraps.Length; j++)
-                {
-                    if (rootBootstraps[j] != null)
-                    {
-                        bootstraps.Add(rootBootstraps[j]);
-                    }
-                }
-            }
-
-            return bootstraps;
-        }
-
-        private static void EnsureAssetFolder(string assetPath)
-        {
-            string directory = System.IO.Path.GetDirectoryName(assetPath)
-                ?.Replace('\\', '/');
-            if (string.IsNullOrWhiteSpace(directory) || directory == "Assets")
-            {
-                return;
-            }
-
-            string current = "Assets";
-            string[] parts = directory.Substring("Assets".Length)
-                .Trim('/')
-                .Split('/');
-            for (int i = 0; i < parts.Length; i++)
-            {
-                string next = current + "/" + parts[i];
-                if (!AssetDatabase.IsValidFolder(next))
-                {
-                    AssetDatabase.CreateFolder(current, parts[i]);
-                }
-
-                current = next;
-            }
+            WebViewerProductBuildDefinition definition =
+                UnityEditor.AssetDatabase.LoadAssetAtPath<
+                    WebViewerProductBuildDefinition>(
+                    WebViewerProductBuildConfiguration.DefinitionAssetPath);
+            string value = definition == null ? null : selector(definition);
+            return string.IsNullOrWhiteSpace(value)
+                ? fallback
+                : value.Trim();
         }
     }
 }

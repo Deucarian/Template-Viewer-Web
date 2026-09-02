@@ -2,14 +2,19 @@
   "name": "Deucarian.TemplateViewerWeb.Tests.EditMode",
   "rootNamespace": "Deucarian.TemplateViewerWeb.Tests",
   "references": [
+    "Deucarian.BuildPipeline.Editor",
     "Deucarian.CommandRouting",
     "Deucarian.CommandRouting.WebGLIntegration",
     "Deucarian.CommandRouting.Editor",
     "Deucarian.TemplateViewer",
     "Deucarian.TemplateViewerWeb",
     "Deucarian.TemplateViewerWeb.Editor",
+    "Deucarian.TemplateViewerWeb.Tests.Support",
+    "Deucarian.Theming",
     "Deucarian.Authentication",
     "Deucarian.Authentication.ViewerIntegration",
+    "Deucarian.WebGLTemplate.Editor",
+    "Unity.TextMeshPro",
     "Newtonsoft.Json"
   ],
   "includePlatforms": [

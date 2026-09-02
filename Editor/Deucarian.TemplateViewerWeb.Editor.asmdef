@@ -6,10 +6,12 @@
     "Deucarian.CommandRouting",
     "Deucarian.CommandRouting.Editor",
     "Deucarian.TemplateViewer",
+    "Deucarian.Theming",
     "Deucarian.Authentication",
     "Deucarian.Authentication.ViewerIntegration",
     "Deucarian.WebGLTemplate.Editor",
     "Deucarian.TemplateViewerWeb",
+    "Unity.TextMeshPro",
     "Newtonsoft.Json"
   ],
   "includePlatforms": [

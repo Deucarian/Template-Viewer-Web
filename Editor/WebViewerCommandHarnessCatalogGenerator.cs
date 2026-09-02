@@ -14,6 +14,7 @@ namespace Deucarian.TemplateViewerWeb.Editor
 {
     public static class WebViewerCommandHarnessCatalogGenerator
     {
+        public const string DefaultTransportId = "web-viewer";
         public const string DefaultCatalogPath =
             "Library/Deucarian/WebViewerHarness/commands.generated.json";
 
@@ -25,10 +26,10 @@ namespace Deucarian.TemplateViewerWeb.Editor
                 throw new ArgumentNullException(nameof(bootstrap));
             }
 
-            ViewerFeatureBehaviour[] features =
-                bootstrap.GetComponents<ViewerFeatureBehaviour>();
+            IReadOnlyList<ViewerFeatureBehaviour> features =
+                bootstrap.ResolvedFeatureBehaviours;
             bool hasProductVisibility = false;
-            for (int index = 0; index < features.Length; index++)
+            for (int index = 0; index < features.Count; index++)
             {
                 if (features[index] != null &&
                     features[index].VisibilityFeatureFactory != null)
@@ -39,7 +40,7 @@ namespace Deucarian.TemplateViewerWeb.Editor
             }
 
             var handlers = new List<ICommandHandler<ViewerApplication>>(
-                ViewerCommandHandlers.Create(
+                ViewerCommandHandlers.CreateDefault(
                     includeGenericVisibilityCommands: !hasProductVisibility,
                     initializationHandler: ViewerFeatureComposition
                         .ResolveInitializationCommandHandler(features)));
@@ -47,7 +48,7 @@ namespace Deucarian.TemplateViewerWeb.Editor
                 ViewerCommandHarnessCatalogBuilder.CreateGenericScenarios(
                     includeGenericVisibilityCommands: !hasProductVisibility));
             ViewerCommandHarnessScenario disposeScenario =
-                features.Length > 0
+                features.Count > 0
                     ? scenarios.Find(value => value.Id == "dispose")
                     : null;
             if (disposeScenario != null)
@@ -55,7 +56,7 @@ namespace Deucarian.TemplateViewerWeb.Editor
                 scenarios.Remove(disposeScenario);
             }
 
-            for (int index = 0; index < features.Length; index++)
+            for (int index = 0; index < features.Count; index++)
             {
                 ViewerFeatureBehaviour feature = features[index];
                 if (feature == null)
@@ -127,7 +128,7 @@ namespace Deucarian.TemplateViewerWeb.Editor
 
                 ViewerCommandHarnessCatalog catalog =
                     CreateCatalog(bootstrap);
-                Write(catalog, catalogPath);
+                Write(catalog, bootstrap.TransportId, catalogPath);
                 return catalog;
             }
             finally
@@ -141,7 +142,13 @@ namespace Deucarian.TemplateViewerWeb.Editor
 
         public static void Write(
             ViewerCommandHarnessCatalog catalog,
-            string catalogPath = DefaultCatalogPath)
+            string catalogPath = DefaultCatalogPath) =>
+            Write(catalog, DefaultTransportId, catalogPath);
+
+        internal static void Write(
+            ViewerCommandHarnessCatalog catalog,
+            string transportId,
+            string catalogPath)
         {
             if (catalog == null)
             {
@@ -170,8 +177,42 @@ namespace Deucarian.TemplateViewerWeb.Editor
             Directory.CreateDirectory(directory);
             File.WriteAllText(
                 absolutePath,
-                JsonConvert.SerializeObject(catalog, Formatting.Indented) +
+                Serialize(catalog, transportId) +
                 Environment.NewLine);
+        }
+
+        internal static string Serialize(
+            ViewerCommandHarnessCatalog catalog,
+            string transportId)
+        {
+            if (catalog == null)
+            {
+                throw new ArgumentNullException(nameof(catalog));
+            }
+
+            string normalizedTransportId = NormalizeTransportId(transportId);
+            return JsonConvert.SerializeObject(
+                new
+                {
+                    schema_version = catalog.SchemaVersion,
+                    transport_id = normalizedTransportId,
+                    default_scenario_id = catalog.DefaultScenarioId,
+                    scenarios = catalog.Scenarios
+                },
+                Formatting.Indented);
+        }
+
+        private static string NormalizeTransportId(string value)
+        {
+            string normalized = value?.Trim() ?? string.Empty;
+            if (normalized.Length == 0 || normalized.Length > 96)
+            {
+                throw new ArgumentException(
+                    "A transport ID between 1 and 96 characters is required.",
+                    nameof(value));
+            }
+
+            return normalized;
         }
 
         private static WebViewerBootstrap FindBootstrap(Scene scene)

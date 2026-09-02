@@ -19,7 +19,10 @@ Deucarian.TemplateViewerWeb.WebViewerPlatformAdapter
 `WebViewerBootstrap` is the scene-facing compatibility component. It inherits
 all generic serialized viewer and authentication fields from
 `ViewerBootstrap`, adds only `iframeMode`, `parentOrigin`, and `transportId`,
-and explicitly creates one Web platform adapter.
+explicitly enables the core's optional model reveal, and creates one Web
+platform adapter. The reveal instance, interruption relay, product-readiness
+composition, and disposal remain owned by the core; the Web package adds no
+second lifecycle owner or serialized reveal state.
 
 The adapter delays browser transport activation until the core has composed
 the application and command runtime. Its activation lease owns the transport
