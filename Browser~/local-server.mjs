@@ -1,4 +1,4 @@
-import { createReadStream, existsSync, statSync } from "node:fs";
+import { createReadStream, existsSync, readFileSync, statSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -51,15 +51,69 @@ export function createHarnessServer(options = {}) {
         notFound(response);
         return;
       }
-      sendResolvedFile(
-        response,
-        buildRoot,
-        url.pathname.slice(viewerPrefix.length));
+      const viewerPath = url.pathname.slice(viewerPrefix.length);
+      if (viewerPath === "index.html") {
+        sendViewerIndex(response, join(buildRoot, "index.html"));
+      } else {
+        sendResolvedFile(response, buildRoot, viewerPath);
+      }
       return;
     }
 
     sendResolvedFile(response, harnessRoot, url.pathname.slice(1));
   });
+}
+
+export function injectLoopbackViewerConfiguration(source) {
+  if (typeof source !== "string" || !source) {
+    throw new Error("The Unity WebGL index is empty.");
+  }
+  const head = /<head(?:\s[^>]*)?>/i.exec(source);
+  if (!head) {
+    throw new Error("The Unity WebGL index has no head element.");
+  }
+  const insertion = head.index + head[0].length;
+  const bootstrap = `
+    <script>
+      (function () {
+        "use strict";
+        var hostname = window.location.hostname;
+        if (hostname !== "localhost" && hostname !== "127.0.0.1" &&
+            hostname !== "[::1]") {
+          throw new Error("The local Web Viewer harness requires a loopback origin.");
+        }
+        var existing = window.deucarianWebViewerConfig ||
+          window.DeucarianWebViewerConfig || {};
+        window.deucarianWebViewerConfig = Object.assign({}, existing, {
+          parentOrigin: window.location.origin
+        });
+      }());
+    </script>`;
+  return source.slice(0, insertion) + bootstrap + source.slice(insertion);
+}
+
+function sendViewerIndex(response, path) {
+  if (!existsSync(path) || !statSync(path).isFile()) {
+    notFound(response);
+    return;
+  }
+  let body;
+  try {
+    body = injectLoopbackViewerConfiguration(readFileSync(path, "utf8"));
+  } catch (error) {
+    response.writeHead(500, {
+      "cache-control": "no-store",
+      "content-type": "text/plain; charset=utf-8"
+    });
+    response.end(error.message);
+    return;
+  }
+  response.writeHead(200, {
+    "cache-control": "no-store",
+    "content-length": Buffer.byteLength(body),
+    "content-type": "text/html; charset=utf-8"
+  });
+  response.end(body);
 }
 
 function sendJson(response, value) {
@@ -110,7 +164,7 @@ function notFound(response) {
   response.end("Not found");
 }
 
-function parseArguments(values) {
+export function parseArguments(values) {
   const result = { port: 8080 };
   for (let index = 0; index < values.length; index += 1) {
     const key = values[index];

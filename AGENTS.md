@@ -8,8 +8,12 @@ policies.
 ## Ownership
 
 This adapter owns the secure browser command/event transport, WebGL page
-lifecycle projection, browser harness, runnable Web sample, and project-owned
-WebGL Build Profile provider. The platform-neutral Template Viewer package owns
+lifecycle projection, browser harness, runnable Web sample, and package-owned
+workflow over project-owned WebGL Build Profiles. Product projects declare
+identity, their real scene, build versions/output locations, and exactly one
+required domain feature in one canonical definition asset; they do not
+implement another build provider. The
+platform-neutral Template Viewer package owns
 the application composition, model loading, commands, visibility, diagnostics,
 authentication, navigation, rendering, and in-viewer shell.
 
@@ -28,6 +32,10 @@ or backend-specific model/version lookup.
 - No direct `UnityEngine.Debug`; use Deucarian Logging.
 - Operational diagnostics contain no source URLs, tokens, or command payloads.
 - Editor integration uses Build Pipeline's shared manager; do not add local chrome.
+- A product definition suppresses the generic fallback scenes and must produce
+  exactly one ordered Development/Production workflow.
+- First-paint theme generation and required TMP readiness are shared build
+  integration, never product-project build code.
 
 ## Validation
 

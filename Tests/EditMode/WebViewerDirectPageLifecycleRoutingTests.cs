@@ -124,7 +124,7 @@ namespace Deucarian.TemplateViewerWeb.Tests
                                new RejectingVisibilityFeatureFactory()))
                 using (var runtime = new CommandRoutingRuntime<ViewerApplication>(
                            application,
-                           ViewerCommandHandlers.Create()))
+                           ViewerCommandHandlers.CreateDefault()))
                 {
                     CommandRoutePortBehaviour port =
                         routeObject.AddComponent<CommandRoutePortBehaviour>();

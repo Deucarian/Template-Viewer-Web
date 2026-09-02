@@ -1,12 +1,15 @@
 {
   "schema_version": 1,
+  "transport_id": "web-viewer",
   "default_scenario_id": "",
   "scenarios": [
     {
       "id": "initialize",
       "label": "Initialize viewer",
       "command": "initialize_viewer",
-      "payload": { "revision": "$revision" },
+      "payload": {
+        "revision": "$revision"
+      },
       "run_automatically": true,
       "expected_success": true
     },
@@ -14,7 +17,12 @@
       "id": "select-red",
       "label": "Select red",
       "command": "select_elements",
-      "payload": { "revision": "$revision", "element_ids": ["red"] },
+      "payload": {
+        "revision": "$revision",
+        "element_ids": [
+          "red"
+        ]
+      },
       "run_automatically": true,
       "expected_success": true
     },
@@ -24,7 +32,10 @@
       "command": "select_elements",
       "payload": {
         "revision": "$revision",
-        "element_ids": ["green", "blue"]
+        "element_ids": [
+          "green",
+          "blue"
+        ]
       },
       "run_automatically": true,
       "expected_success": true
@@ -33,7 +44,9 @@
       "id": "clear-selection",
       "label": "Clear selection",
       "command": "clear_selection",
-      "payload": { "revision": "$revision" },
+      "payload": {
+        "revision": "$revision"
+      },
       "run_automatically": true,
       "expected_success": true
     },
@@ -41,7 +54,12 @@
       "id": "invalid-selection",
       "label": "Reject unknown element",
       "command": "select_elements",
-      "payload": { "revision": "$revision", "element_ids": ["missing"] },
+      "payload": {
+        "revision": "$revision",
+        "element_ids": [
+          "missing"
+        ]
+      },
       "run_automatically": true,
       "expected_success": false
     },
@@ -49,15 +67,43 @@
       "id": "stale-selection",
       "label": "Reject stale revision",
       "command": "select_elements",
-      "payload": { "revision": "$stale_revision", "element_ids": ["blue"] },
+      "payload": {
+        "revision": "$stale_revision",
+        "element_ids": [
+          "blue"
+        ]
+      },
       "run_automatically": true,
       "expected_success": false
+    },
+    {
+      "id": "navigation-home",
+      "label": "Return camera to origin",
+      "command": "navigation",
+      "payload": {
+        "action": "home"
+      },
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "display-settings",
+      "label": "Apply reference display settings",
+      "command": "set_display_settings",
+      "payload": {
+        "rendering_mode": "color_faithful",
+        "camera_relative_light": false
+      },
+      "run_automatically": false,
+      "expected_success": true
     },
     {
       "id": "dispose",
       "label": "Dispose viewer",
       "command": "dispose_viewer",
-      "payload": { "revision": "$revision" },
+      "payload": {
+        "revision": "$revision"
+      },
       "run_automatically": true,
       "expected_success": true
     },
@@ -65,7 +111,9 @@
       "id": "update-access-token",
       "label": "Update access token (safe invalid example)",
       "command": "update_access_token",
-      "payload": { "access_token": "" },
+      "payload": {
+        "access_token": ""
+      },
       "run_automatically": false,
       "expected_success": false
     },
@@ -73,7 +121,9 @@
       "id": "update-access-token-legacy",
       "label": "Update access token compatibility alias",
       "command": "updateaccesstoken",
-      "payload": { "access_token": "" },
+      "payload": {
+        "access_token": ""
+      },
       "run_automatically": false,
       "expected_success": false
     },
@@ -89,6 +139,222 @@
       "id": "clear-access-token",
       "label": "Clear access token",
       "command": "clear_access_token",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-fly",
+      "label": "Fly",
+      "command": "fly",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-home",
+      "label": "Home",
+      "command": "home",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-nav",
+      "label": "Nav",
+      "command": "nav",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-navigate",
+      "label": "Navigate",
+      "command": "navigate",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-navigation-mode",
+      "label": "Navigation mode",
+      "command": "navigation_mode",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-navigation-sensitivity",
+      "label": "Navigation sensitivity",
+      "command": "navigation_sensitivity",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-navigationmode",
+      "label": "Navigationmode",
+      "command": "navigationmode",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-navigationsensitivity",
+      "label": "Navigationsensitivity",
+      "command": "navigationsensitivity",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-orbit",
+      "label": "Orbit",
+      "command": "orbit",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-origin",
+      "label": "Origin",
+      "command": "origin",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-reset-camera",
+      "label": "Reset camera",
+      "command": "reset_camera",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-resetcamera",
+      "label": "Resetcamera",
+      "command": "resetcamera",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-return-to-origin",
+      "label": "Return to origin",
+      "command": "return_to_origin",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-returntoorigin",
+      "label": "Returntoorigin",
+      "command": "returntoorigin",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-set-navigation-mode",
+      "label": "Set navigation mode",
+      "command": "set_navigation_mode",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-set-navigation-sensitivity",
+      "label": "Set navigation sensitivity",
+      "command": "set_navigation_sensitivity",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-setdisplaysettings",
+      "label": "Setdisplaysettings",
+      "command": "setdisplaysettings",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-setnavigationmode",
+      "label": "Setnavigationmode",
+      "command": "setnavigationmode",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-setnavigationsensitivity",
+      "label": "Setnavigationsensitivity",
+      "command": "setnavigationsensitivity",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-toggle-top",
+      "label": "Toggle top",
+      "command": "toggle_top",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-toggle-top-down",
+      "label": "Toggle top down",
+      "command": "toggle_top_down",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-toggletop",
+      "label": "Toggletop",
+      "command": "toggletop",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-toggletopdown",
+      "label": "Toggletopdown",
+      "command": "toggletopdown",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-top-down",
+      "label": "Top down",
+      "command": "top_down",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-top-view",
+      "label": "Top view",
+      "command": "top_view",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-topdown",
+      "label": "Topdown",
+      "command": "topdown",
+      "payload": {},
+      "run_automatically": false,
+      "expected_success": true
+    },
+    {
+      "id": "command-topview",
+      "label": "Topview",
+      "command": "topview",
       "payload": {},
       "run_automatically": false,
       "expected_success": true
