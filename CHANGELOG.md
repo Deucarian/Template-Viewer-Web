@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.6.0] - 2026-09-02
+
+### Added
+
+- Added one canonical declarative product build definition so real product Web
+  viewer scenes use the package-owned Build Manager provider instead of
+  copying provider/preflight code into each project.
+- Added stable product CI entry points, deterministic two-target registration,
+  duplicate-definition prevention, exact domain-component validation, and
+  canonical shared profile locations.
+- Added shared reference-theme/TMP preflight and browser first-paint theme
+  generation for declarative product builds.
+- Added exact product transport IDs to generated browser catalogs and a
+  loopback-only real-build harness bootstrap that supplies the explicit parent
+  origin before Unity starts.
+
+### Changed
+
+- Product definitions now suppress the generic fallback scenes and workflows;
+  installations without a definition retain the runnable generic sample.
+- Applied product versions, run-in-background, and development/production HTTP
+  policy through Build Pipeline's public passive profile-settings contract.
+- Routed product validation, reversible contributor scopes, artifact
+  validation, and safe Production output replacement through Build Pipeline
+  0.6.0.
+- Preserved ordinary native and CI Development output overrides without
+  Production replacement; product and fallback scripts-only Development
+  builds now enforce manifest, fingerprint, profile, and output-ownership
+  compatibility before compilation.
+- Updated Command Routing to 0.2.6 and Template Viewer to 0.3.1 for the
+  canonical all-outcomes route contract, serialized presentation events, and
+  immutable authentication outcome observer.
+- `WebViewerBootstrap` now explicitly enables Template Viewer's optional shared
+  model reveal without adding Web-owned readiness state or lifecycle cleanup.
+
 ## [0.5.5] - 2026-08-28
 
 ### Fixed

@@ -39,6 +39,7 @@ export async function startHarness(options = {}) {
   const catalogUrl = query.get("catalog") || "./commands.generated.json";
   const catalog = await readJson(fetchImpl, catalogUrl);
   validateCatalog(catalog);
+  const transportId = resolveCatalogTransportId(catalog);
 
   let configuredViewer = query.get("viewer");
   if (!configuredViewer) {
@@ -68,7 +69,7 @@ export async function startHarness(options = {}) {
     hostWindow: windowRef,
     iframe,
     targetOrigin: windowRef.location.origin,
-    transportId: "web-viewer"
+    transportId
   });
 
   function write(value) {
@@ -217,6 +218,21 @@ function validateCatalog(catalog) {
     }
     ids.add(scenario.id);
   }
+}
+
+export function resolveCatalogTransportId(catalog) {
+  const configured = catalog?.transport_id;
+  if (configured === undefined) {
+    return "web-viewer";
+  }
+  if (typeof configured !== "string") {
+    throw new Error("The command harness transport ID is invalid.");
+  }
+  const normalized = configured.trim();
+  if (!normalized || normalized.length > 96) {
+    throw new Error("The command harness transport ID is invalid.");
+  }
+  return normalized;
 }
 
 if (typeof window !== "undefined" && typeof document !== "undefined" &&

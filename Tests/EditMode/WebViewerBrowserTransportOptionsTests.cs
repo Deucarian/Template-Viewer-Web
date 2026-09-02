@@ -1,7 +1,9 @@
 using System;
+using System.Reflection;
 using Deucarian.CommandRouting.WebGLIntegration;
 using Deucarian.TemplateViewer;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Deucarian.TemplateViewerWeb.Tests
 {
@@ -131,6 +133,27 @@ namespace Deucarian.TemplateViewerWeb.Tests
             Assert.That(
                 typeof(WebViewerBootstrap).BaseType,
                 Is.EqualTo(typeof(ViewerBootstrap)));
+        }
+
+        [Test]
+        public void BootstrapOptsIntoTheSharedModelRevealReadiness()
+        {
+            var root = new GameObject("Web reveal readiness contract");
+            try
+            {
+                WebViewerBootstrap bootstrap =
+                    root.AddComponent<WebViewerBootstrap>();
+                PropertyInfo property = typeof(ViewerBootstrap).GetProperty(
+                    "EnableModelRevealReadiness",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+
+                Assert.That(property, Is.Not.Null);
+                Assert.That(property.GetValue(bootstrap), Is.True);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(root);
+            }
         }
 
         private sealed class EmbeddingContext :

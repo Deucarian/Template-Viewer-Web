@@ -6,6 +6,7 @@ globalThis.__DEUCARIAN_HARNESS_NO_AUTO_START__ = true;
 const {
   createScenarioEnvelope,
   materializePayload,
+  resolveCatalogTransportId,
   startHarness
 } = await import("../harness.js");
 
@@ -139,7 +140,51 @@ test("scenario envelopes materialize current and stale revisions", () => {
       command: "select_elements",
       payload: { revision: 9, element_ids: ["red"] },
       metadata: { source: "local-harness" }
+  });
+});
+
+test("product catalogs route their exact Activity and Report transport IDs", async () => {
+  for (const transportId of ["activity-viewer", "report-viewer"]) {
+    const browserWindow = new FakeWindow();
+    const viewerWindow = new FakeWindow();
+    const iframe = new FakeIframe(viewerWindow);
+    const documentRef = createDocument(iframe);
+    const productCatalog = { ...catalog, transport_id: transportId };
+    const productFetch = async url => ({
+      ok: true,
+      async json() {
+        return url.includes("harness-config")
+          ? { viewer_path: "/viewer/index.html" }
+          : productCatalog;
+      }
     });
+
+    const harness = await startHarness({
+      windowRef: browserWindow,
+      documentRef,
+      fetchImpl: productFetch
+    });
+    assert.equal(
+      viewerWindow.posts.at(-1).message.transport_id,
+      transportId);
+    harness.dispose();
+  }
+});
+
+test("catalog transport validation has only the generic compatibility fallback", () => {
+  assert.equal(resolveCatalogTransportId({}), "web-viewer");
+  assert.equal(
+    resolveCatalogTransportId({ transport_id: " report-viewer " }),
+    "report-viewer");
+  assert.throws(
+    () => resolveCatalogTransportId({ transport_id: "" }),
+    /transport ID is invalid/);
+  assert.throws(
+    () => resolveCatalogTransportId({ transport_id: null }),
+    /transport ID is invalid/);
+  assert.throws(
+    () => resolveCatalogTransportId({ transport_id: "x".repeat(97) }),
+    /transport ID is invalid/);
 });
 
 test("the harness renders the catalog and runs its automated scenarios", async () => {
