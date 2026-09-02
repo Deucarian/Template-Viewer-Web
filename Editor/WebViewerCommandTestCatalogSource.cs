@@ -65,6 +65,7 @@ namespace Deucarian.TemplateViewerWeb.Editor
                     new
                     {
                         schema_version = catalog.SchemaVersion,
+                        transport_id = bootstrap.TransportId,
                         remote_endpoint = remoteEndpoint,
                         default_scenario_id = catalog.DefaultScenarioId,
                         scenarios = catalog.Scenarios

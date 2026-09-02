@@ -22,8 +22,10 @@
     "com.deucarian.command-routing.webgl-integration",
     "com.deucarian.diagnostics",
     "com.deucarian.template.viewer",
+    "com.deucarian.theming",
     "com.deucarian.authentication",
     "com.deucarian.webgl-template",
+    "com.unity.textmeshpro",
     "com.unity.nuget.newtonsoft-json"
   ],
   "optionalVersionDefinedDependencies": [],

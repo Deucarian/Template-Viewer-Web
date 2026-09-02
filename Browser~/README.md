@@ -18,13 +18,15 @@ automated sequence to be tested before a Unity WebGL build exists.
 To exercise a real development build instead:
 
 ```powershell
-npm start -- --build C:/path/to/WebGLBuild
+npm start -- --build C:/path/to/WebGLBuild --catalog C:/path/to/project/Library/Deucarian/WebViewerHarness/commands.generated.json
 ```
 
-The development viewer scene must use iframe mode with parent origin
-`http://localhost:8080`. The server exposes the build below `/viewer` so the
-parent and iframe retain the same exact origin. Opening the HTML directly does
-not exercise production origin checks.
+The server exposes the build below `/viewer`, carries the generated product
+transport ID into the parent host, and injects its exact loopback
+`window.location.origin` into the child before Unity starts. The parent and
+iframe therefore retain one explicit same origin without a wildcard,
+`document.referrer`, or serialized localhost fallback. Opening the HTML
+directly does not exercise the secured parent/iframe path.
 
 ## Generated commands
 
@@ -34,6 +36,11 @@ template's **Sync Profiles** action writes its development scene catalog to:
 ```text
 Library/Deucarian/WebViewerHarness/commands.generated.json
 ```
+
+Generated product catalogs carry the scene bootstrap's exact `transport_id`.
+For compatibility, an older catalog with no `transport_id` is treated only as
+the generic sample and uses `web-viewer`; invalid or mismatched IDs fail
+instead of selecting another product transport.
 
 Serve a consumer catalog with:
 
@@ -50,10 +57,10 @@ safe representative payloads and automated expectations. A
 add valid product examples. Commands without an example remain visible but do
 not join the automated run.
 
-Product build providers call
-`WebViewerCommandHarnessCatalogGenerator.GenerateForScene(scenePath)` from
-their existing synchronization action. This keeps catalog generation inside
-the shared package without adding another project-specific editor window.
+The package-owned product build workflow calls
+`WebViewerCommandHarnessCatalogGenerator.GenerateForScene(scenePath)` for the
+real scene declared by `WebViewerProductBuildDefinition`. Products do not need
+a custom provider or a second editor window.
 
 Authentication update examples never store or generate a real token and are
 excluded from automation. The harness contains no credentials or production

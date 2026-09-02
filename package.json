@@ -1,8 +1,8 @@
 {
   "name": "com.deucarian.template.viewer.web",
-  "version": "0.5.5",
+  "version": "0.6.0",
   "displayName": "Deucarian Web Viewer Adapter",
-  "description": "WebGL adapter for the platform-neutral Deucarian Viewer Template, with secure browser commands, page lifecycle projection, a local browser harness, and project-owned build profiles.",
+  "description": "WebGL adapter for the platform-neutral Deucarian Viewer Template, with secure browser commands, page lifecycle projection, a local browser harness, and one declarative product build workflow.",
   "unity": "6000.0",
   "license": "MIT",
   "author": {
@@ -21,13 +21,15 @@
     "browser"
   ],
   "dependencies": {
-    "com.deucarian.build-pipeline": "0.5.0",
-    "com.deucarian.command-routing": "0.2.2",
+    "com.deucarian.build-pipeline": "0.6.0",
+    "com.deucarian.command-routing": "0.2.6",
     "com.deucarian.command-routing.webgl-integration": "0.1.1",
     "com.deucarian.diagnostics": "0.1.4",
-    "com.deucarian.template.viewer": "0.2.1",
+    "com.deucarian.template.viewer": "0.3.1",
+    "com.deucarian.theming": "1.1.2",
     "com.deucarian.authentication": "1.0.0",
     "com.deucarian.webgl-template": "0.1.0",
+    "com.unity.textmeshpro": "3.0.6",
     "com.unity.nuget.newtonsoft-json": "3.2.2"
   },
   "samples": [
