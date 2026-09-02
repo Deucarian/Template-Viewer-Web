@@ -14,7 +14,8 @@
     "Deucarian.TemplateViewerWeb.Samples.WebViewer"
   ],
   "testAssemblies": [
-    "Deucarian.TemplateViewerWeb.Tests.EditMode"
+    "Deucarian.TemplateViewerWeb.Tests.EditMode",
+    "Deucarian.TemplateViewerWeb.Tests.Support"
   ],
   "requiredDependencies": [
     "com.deucarian.build-pipeline",
