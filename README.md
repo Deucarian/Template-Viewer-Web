@@ -120,8 +120,13 @@ The bridge requires the additive SIM-866 startup snapshot/event API; it does
 not duplicate that ticket's directory or fallback policy.
 
 Add the package-owned bridge to the product's real scene and explicitly assign
-its `connectionGate` and `viewerBootstrap` fields. Both must be in the same
-loaded scene, and the gate's startup-behaviour list must contain that bootstrap.
+its `connectionGate` and `viewerBootstrap` fields. Both must have valid same-scene
+references, and the gate's startup-behaviour list must contain that bootstrap.
+The initial `OnEnable` runs while Unity is still loading the scene; `isLoaded`
+is deliberately not a binding requirement. The bridge's read-only `BindingFailure`
+reports only a fixed local enum reason for missing references, invalid/different
+scenes, or missing explicit ownership. Invalid wiring reports the existing safe
+configuration-failure page code, not a backend-connection error or exception text.
 Keep the bridge enabled and **out of** the gate's disabled startup-behaviour
 list. It runs before the gate, subscribes then replays its current snapshot,
 and releases listeners on disable/destroy or gate disposal. It performs no
@@ -156,8 +161,11 @@ and the Unity Live Tester use the same command composition.
 
 ## Validation
 
-Run the Package Registry validator, Unity EditMode tests, `npm test` in
-`Browser~`, and `git diff --check`.
+Run the Package Registry validator, Unity EditMode and PlayMode tests, `npm test`
+in `Browser~`, and `git diff --check`. With Connection 1.2.1 or newer, the optional
+`SimultriaWebViewerColdSceneTests` loads a serialized cold scene and verifies real
+`OnEnable` guard values, subscription and automatic scene-unload cleanup. Its
+inactive gate and disabled viewer prevent network or application startup.
 
 ## License
 

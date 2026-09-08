@@ -14,10 +14,7 @@ namespace Deucarian.TemplateViewerWeb.SimultriaIntegration
             WebViewerBootstrap viewer,
             Action<WebViewerStartupStatusProjection> publisher)
         {
-            if (connectionGate == null || viewer == null ||
-                !viewer.gameObject.scene.IsValid() || !viewer.gameObject.scene.isLoaded ||
-                connectionGate.gameObject.scene != viewer.gameObject.scene ||
-                !connectionGate.ContainsStartupBehaviour(viewer))
+            if (ValidateBinding(connectionGate, viewer) != SimultriaWebViewerStartupBindingFailure.None)
             {
                 throw new ArgumentException("The connection gate must explicitly own this same-scene viewer.");
             }
@@ -36,6 +33,23 @@ namespace Deucarian.TemplateViewerWeb.SimultriaIntegration
                 Dispose();
                 throw;
             }
+        }
+
+        internal static SimultriaWebViewerStartupBindingFailure ValidateBinding(
+            SimultriaViewerBuildConnectionGate connectionGate, WebViewerBootstrap viewer)
+        {
+            if (viewer == null) return SimultriaWebViewerStartupBindingFailure.ViewerMissing;
+            if (connectionGate == null) return SimultriaWebViewerStartupBindingFailure.ConnectionGateMissing;
+            // Unity sets isLoaded only after scene objects receive OnEnable.
+            // Explicit live references and valid scene identity already prove
+            // the binding; requiring isLoaded rejects genuine cold activation.
+            if (!viewer.gameObject.scene.IsValid() || !connectionGate.gameObject.scene.IsValid())
+                return SimultriaWebViewerStartupBindingFailure.InvalidScene;
+            if (connectionGate.gameObject.scene != viewer.gameObject.scene)
+                return SimultriaWebViewerStartupBindingFailure.SceneMismatch;
+            if (!connectionGate.ContainsStartupBehaviour(viewer))
+                return SimultriaWebViewerStartupBindingFailure.ViewerNotOwned;
+            return SimultriaWebViewerStartupBindingFailure.None;
         }
 
         internal void OnStatus(SimultriaViewerBuildStartupSnapshot snapshot)

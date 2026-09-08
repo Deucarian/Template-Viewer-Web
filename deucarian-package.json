@@ -17,7 +17,8 @@
   "testAssemblies": [
     "Deucarian.TemplateViewerWeb.Tests.EditMode",
     "Deucarian.TemplateViewerWeb.Tests.Support",
-    "Deucarian.TemplateViewerWeb.SimultriaIntegration.Tests"
+    "Deucarian.TemplateViewerWeb.SimultriaIntegration.Tests",
+    "Deucarian.TemplateViewerWeb.SimultriaIntegration.Tests.PlayMode"
   ],
   "requiredDependencies": [
     "com.deucarian.build-pipeline",

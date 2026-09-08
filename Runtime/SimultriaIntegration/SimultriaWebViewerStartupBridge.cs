@@ -14,28 +14,36 @@ namespace Deucarian.TemplateViewerWeb.SimultriaIntegration
     [DisallowMultipleComponent]
     public sealed class SimultriaWebViewerStartupBridge : MonoBehaviour
     {
+        internal const string InvalidBindingShellCode = "viewer_composition_failed";
         [SerializeField] private SimultriaViewerBuildConnectionGate connectionGate;
         [SerializeField] private WebViewerBootstrap viewerBootstrap;
         private IDisposable subscription;
 
+        /// <summary>The last binding attempt's fixed local diagnostic reason.</summary>
+        public SimultriaWebViewerStartupBindingFailure BindingFailure { get; private set; }
+
         private void OnEnable()
         {
             Detach();
-            try
+            BindingFailure = SimultriaWebViewerStartupSubscription.ValidateBinding(
+                connectionGate, viewerBootstrap);
+            if (BindingFailure == SimultriaWebViewerStartupBindingFailure.None &&
+                gameObject.scene != viewerBootstrap.gameObject.scene)
             {
-                if (viewerBootstrap == null || gameObject.scene != viewerBootstrap.gameObject.scene)
-                {
-                    throw new ArgumentException("The startup bridge requires an explicit same-scene viewer.");
-                }
+                BindingFailure = SimultriaWebViewerStartupBindingFailure.SceneMismatch;
+            }
 
-                subscription = new SimultriaWebViewerStartupSubscription(
-                    connectionGate, viewerBootstrap, WebViewerStartupStatusProjection.Publish);
-            }
-            catch (ArgumentException)
+            if (BindingFailure != SimultriaWebViewerStartupBindingFailure.None)
             {
+                // Invalid scene wiring is configuration failure, not a claim
+                // that a backend connection attempt failed. Keep page copy safe.
                 DeucarianWebGLShell.ReportState(
-                    DeucarianWebGLShellState.Failed, "viewer_connection_failed");
+                    DeucarianWebGLShellState.Failed, InvalidBindingShellCode);
+                return;
             }
+
+            subscription = new SimultriaWebViewerStartupSubscription(
+                connectionGate, viewerBootstrap, WebViewerStartupStatusProjection.Publish);
         }
 
         private void OnDisable() => Detach();

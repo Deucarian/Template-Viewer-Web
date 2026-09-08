@@ -130,6 +130,66 @@ namespace Deucarian.TemplateViewerWeb.SimultriaIntegration.Tests
                 "connectionGate", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(bridge, gate);
             Assert.DoesNotThrow(() => InvokeBridge(bridge, "OnEnable"));
             Assert.That(ObserverCount(), Is.Zero);
+            Assert.That(bridge.BindingFailure,
+                Is.EqualTo(SimultriaWebViewerStartupBindingFailure.ViewerMissing));
+            Assert.That(SimultriaWebViewerStartupBridge.InvalidBindingShellCode,
+                Is.EqualTo("viewer_composition_failed"));
+        }
+
+        [Test]
+        public void BindingValidationReturnsOnlyFixedReasons()
+        {
+            Assert.That(SimultriaWebViewerStartupSubscription.ValidateBinding(gate, null),
+                Is.EqualTo(SimultriaWebViewerStartupBindingFailure.ViewerMissing));
+            Assert.That(SimultriaWebViewerStartupSubscription.ValidateBinding(null, viewer),
+                Is.EqualTo(SimultriaWebViewerStartupBindingFailure.ConnectionGateMissing));
+            Assert.That(SimultriaWebViewerStartupSubscription.ValidateBinding(gate, viewer),
+                Is.EqualTo(SimultriaWebViewerStartupBindingFailure.None));
+            typeof(SimultriaViewerBuildConnectionGate).GetField(
+                "startupBehaviours", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(gate, Array.Empty<Behaviour>());
+            Assert.That(SimultriaWebViewerStartupSubscription.ValidateBinding(gate, viewer),
+                Is.EqualTo(SimultriaWebViewerStartupBindingFailure.ViewerNotOwned));
+            Assert.That(Enum.GetNames(typeof(SimultriaWebViewerStartupBindingFailure)),
+                Is.EqualTo(new[] { "None", "ViewerMissing", "ConnectionGateMissing",
+                    "InvalidScene", "SceneMismatch", "ViewerNotOwned" }));
+        }
+
+        [Test]
+        public void PersistentPrefabReferencesCannotBindAsALiveScene()
+        {
+            string path = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(
+                "Assets/__DeucarianWebStartupBinding.prefab");
+            try
+            {
+                var prefab = UnityEditor.PrefabUtility.SaveAsPrefabAsset(root, path);
+                Assert.That(SimultriaWebViewerStartupSubscription.ValidateBinding(
+                    prefab.GetComponent<SimultriaViewerBuildConnectionGate>(),
+                    prefab.GetComponent<WebViewerBootstrap>()),
+                    Is.EqualTo(SimultriaWebViewerStartupBindingFailure.InvalidScene));
+            }
+            finally
+            {
+                UnityEditor.AssetDatabase.DeleteAsset(path);
+            }
+        }
+
+        [Test]
+        public void RepairingABindingReplacesTheFixedLocalFailure()
+        {
+            var bridge = root.AddComponent<SimultriaWebViewerStartupBridge>();
+            InvokeBridge(bridge, "OnEnable");
+            Assert.That(bridge.BindingFailure,
+                Is.EqualTo(SimultriaWebViewerStartupBindingFailure.ViewerMissing));
+            typeof(SimultriaWebViewerStartupBridge).GetField(
+                "connectionGate", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(bridge, gate);
+            typeof(SimultriaWebViewerStartupBridge).GetField(
+                "viewerBootstrap", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(bridge, viewer);
+            InvokeBridge(bridge, "OnEnable");
+            Assert.That(bridge.BindingFailure, Is.EqualTo(SimultriaWebViewerStartupBindingFailure.None));
+            Assert.That(ObserverCount(), Is.EqualTo(1));
+            InvokeBridge(bridge, "OnDisable");
+            Assert.That(ObserverCount(), Is.Zero);
         }
 
         [TestCase("simultria.production", "production")]
