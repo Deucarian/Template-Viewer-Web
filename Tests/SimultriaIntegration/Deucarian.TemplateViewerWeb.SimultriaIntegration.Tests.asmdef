@@ -1,0 +1,25 @@
+{
+  "name": "Deucarian.TemplateViewerWeb.SimultriaIntegration.Tests",
+  "rootNamespace": "Deucarian.TemplateViewerWeb.SimultriaIntegration.Tests",
+  "references": [
+    "Deucarian.API",
+    "Deucarian.TemplateViewer",
+    "Deucarian.TemplateViewerWeb",
+    "Deucarian.TemplateViewerWeb.SimultriaIntegration",
+    "Deucarian.SimultriaViewerIntegration"
+  ],
+  "includePlatforms": ["Editor"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": ["nunit.framework.dll"],
+  "autoReferenced": false,
+  "defineConstraints": ["UNITY_INCLUDE_TESTS", "DEUCARIAN_SIMULTRIA_STARTUP_STATUS"],
+  "versionDefines": [{
+    "name": "com.deucarian.simultria-viewer-integration",
+    "expression": "1.2.1",
+    "define": "DEUCARIAN_SIMULTRIA_STARTUP_STATUS"
+  }],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "noEngineReferences": false
+}

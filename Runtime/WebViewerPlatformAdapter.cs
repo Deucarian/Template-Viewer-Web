@@ -19,14 +19,15 @@ namespace Deucarian.TemplateViewerWeb
 
         internal WebViewerPlatformAdapter(
             GameObject hostObject,
-            WebGlCommandTransportOptions transportOptions)
+            WebGlCommandTransportOptions transportOptions,
+            WebViewerLifecycleStatusSink startupStatusSink = null)
         {
             host = hostObject ??
                 throw new ArgumentNullException(nameof(hostObject));
             options = transportOptions ??
                 throw new ArgumentNullException(nameof(transportOptions));
             eventPublisher = new WebGlWebViewerEventPublisher();
-            lifecycleStatusSink = new WebViewerLifecycleStatusSink();
+            lifecycleStatusSink = startupStatusSink ?? new WebViewerLifecycleStatusSink();
         }
 
         public string PlatformId => "webgl";

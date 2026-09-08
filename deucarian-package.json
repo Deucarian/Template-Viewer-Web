@@ -5,7 +5,8 @@
   "operationalPackage": true,
   "ownedCapabilities": [],
   "runtimeAssemblies": [
-    "Deucarian.TemplateViewerWeb"
+    "Deucarian.TemplateViewerWeb",
+    "Deucarian.TemplateViewerWeb.SimultriaIntegration"
   ],
   "editorAssemblies": [
     "Deucarian.TemplateViewerWeb.Editor"
@@ -15,7 +16,8 @@
   ],
   "testAssemblies": [
     "Deucarian.TemplateViewerWeb.Tests.EditMode",
-    "Deucarian.TemplateViewerWeb.Tests.Support"
+    "Deucarian.TemplateViewerWeb.Tests.Support",
+    "Deucarian.TemplateViewerWeb.SimultriaIntegration.Tests"
   ],
   "requiredDependencies": [
     "com.deucarian.build-pipeline",
@@ -29,7 +31,10 @@
     "com.unity.textmeshpro",
     "com.unity.nuget.newtonsoft-json"
   ],
-  "optionalVersionDefinedDependencies": [],
+  "optionalVersionDefinedDependencies": [
+    "com.deucarian.api",
+    "com.deucarian.simultria-viewer-integration"
+  ],
   "allowedDirectDebugCalls": [],
   "allowedDirectUnityObjectLifetimeCalls": [],
   "expectedSamplesRoot": "Samples~"
