@@ -103,6 +103,43 @@ the authentication commands, and the corresponding viewer lifecycle and
 selection events. Browser transport readiness is distinct from application
 `viewer_ready`; the latter occurs only after the shared application is ready.
 
+## Early startup and optional Simultria status
+
+The Web bootstrap creates its page status sink before resolving the deployment
+parent origin. Composition failures therefore reach the shared loading page
+even before command transport or Unity UI exists. The same sink is reused for
+normal application lifecycle. Safe failure codes, not exception text, cross
+this boundary. Template Viewer 0.3.2 and WebGL Template 0.1.1 are required.
+
+When Simultria Viewer Connection 1.2.1 or newer is installed, the version-defined
+`Deucarian.TemplateViewerWeb.SimultriaIntegration` assembly adds
+`SimultriaWebViewerStartupBridge`. This is an optional dependency; installations
+without Connection, or with an older version, compile without the bridge.
+Connection's API assembly is also referenced only behind this optional guard.
+The bridge requires the additive SIM-866 startup snapshot/event API; it does
+not duplicate that ticket's directory or fallback policy.
+
+Add the package-owned bridge to the product's real scene and explicitly assign
+its `connectionGate` and `viewerBootstrap` fields. Both must have valid same-scene
+references, and the gate's startup-behaviour list must contain that bootstrap.
+The initial `OnEnable` runs while Unity is still loading the scene; `isLoaded`
+is deliberately not a binding requirement. The bridge's read-only `BindingFailure`
+reports only a fixed local enum reason for missing references, invalid/different
+scenes, or missing explicit ownership. Invalid wiring reports the existing safe
+configuration-failure page code, not a backend-connection error or exception text.
+Keep the bridge enabled and **out of** the gate's disabled startup-behaviour
+list. It runs before the gate, subscribes then replays its current snapshot,
+and releases listeners on disable/destroy or gate disposal. It performs no
+scene-wide discovery and never enables the viewer or changes routing.
+
+Resolving uses the shared `resolving_environment` progress phase. A gate-selected
+fallback uses `build_profile_fallback` plus one of the fixed simple identifiers
+`production`, `development`, `testing` or `acceptance`; no host,
+version, payload, exception or credential is copied into the page. Exact routing
+is not application readiness and does not show a fallback notice. The shared
+WebGL Template owns human labels, error/retry presentation, and the genuine
+engine-plus-application reveal barrier.
+
 ## Local browser harness
 
 Run the package-owned harness with the included mock:
@@ -124,8 +161,11 @@ and the Unity Live Tester use the same command composition.
 
 ## Validation
 
-Run the Package Registry validator, Unity EditMode tests, `npm test` in
-`Browser~`, and `git diff --check`.
+Run the Package Registry validator, Unity EditMode and PlayMode tests, `npm test`
+in `Browser~`, and `git diff --check`. With Connection 1.2.1 or newer, the optional
+`SimultriaWebViewerColdSceneTests` loads a serialized cold scene and verifies real
+`OnEnable` guard values, subscription and automatic scene-unload cleanup. Its
+inactive gate and disabled viewer prevent network or application startup.
 
 ## License
 

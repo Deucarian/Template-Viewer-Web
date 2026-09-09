@@ -1,0 +1,24 @@
+{
+  "name": "Deucarian.TemplateViewerWeb.SimultriaIntegration",
+  "rootNamespace": "Deucarian.TemplateViewerWeb.SimultriaIntegration",
+  "references": [
+    "Deucarian.API",
+    "Deucarian.TemplateViewer",
+    "Deucarian.TemplateViewerWeb",
+    "Deucarian.SimultriaViewerIntegration",
+    "Deucarian.WebGLTemplate"
+  ],
+  "includePlatforms": ["Editor", "WebGL"],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": ["DEUCARIAN_SIMULTRIA_STARTUP_STATUS"],
+  "versionDefines": [{
+    "name": "com.deucarian.simultria-viewer-integration",
+    "expression": "1.2.1",
+    "define": "DEUCARIAN_SIMULTRIA_STARTUP_STATUS"
+  }],
+  "noEngineReferences": false
+}

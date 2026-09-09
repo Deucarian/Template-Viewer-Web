@@ -1,3 +1,5 @@
+using System;
+using Deucarian.CommandRouting.WebGLIntegration;
 using Deucarian.TemplateViewer;
 using UnityEngine;
 
@@ -16,6 +18,9 @@ namespace Deucarian.TemplateViewerWeb
         [SerializeField] private string parentOrigin =
             "http://localhost:8080";
         [SerializeField] private string transportId = "web-viewer";
+        private readonly WebViewerLifecycleStatusSink startupStatusSink =
+            new WebViewerLifecycleStatusSink();
+        private string compositionFailureCode = "viewer_composition_failed";
 
         public bool IframeMode => iframeMode;
         public string ParentOrigin => parentOrigin;
@@ -32,14 +37,33 @@ namespace Deucarian.TemplateViewerWeb
                     production,
                     out issue);
 
-        protected override IViewerPlatformAdapter CreatePlatformAdapter() =>
-            new WebViewerPlatformAdapter(
-                gameObject,
-                WebViewerBrowserTransportOptions.Create(
+        protected override IViewerLifecycleStatusSink
+            CreateEarlyLifecycleStatusSink() => startupStatusSink;
+
+        protected override string CompositionFailureCode => compositionFailureCode;
+
+        protected override IViewerPlatformAdapter CreatePlatformAdapter()
+        {
+            compositionFailureCode = "viewer_composition_failed";
+            WebGlCommandTransportOptions options;
+            try
+            {
+                options = WebViewerBrowserTransportOptions.Create(
                     transportId,
                     iframeMode,
                     parentOrigin,
-                    new WebViewerBrowserEmbeddingContextInterop()));
+                    new WebViewerBrowserEmbeddingContextInterop());
+            }
+            catch (InvalidOperationException)
+            {
+                // This factory's InvalidOperationException is its explicit
+                // invalid/missing parent-origin check; never forward its text.
+                compositionFailureCode = "viewer_parent_origin_invalid";
+                throw;
+            }
+
+            return new WebViewerPlatformAdapter(gameObject, options, startupStatusSink);
+        }
 
         protected override bool TryValidatePlatformConfiguration(
             IViewerPlatformAdapter adapter,
