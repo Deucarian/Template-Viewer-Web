@@ -115,7 +115,9 @@ When Simultria Viewer Connection 1.2.1 or newer is installed, the version-define
 `Deucarian.TemplateViewerWeb.SimultriaIntegration` assembly adds
 `SimultriaWebViewerStartupBridge`. This is an optional dependency; installations
 without Connection, or with an older version, compile without the bridge.
-Connection's API assembly is also referenced only behind this optional guard.
+API 2.0.2 or newer (already required by Connection 1.2.1) has its own matching
+version define and assembly constraint. The runtime bridge and its optional
+test assemblies require both guards; API remains optional for this adapter.
 The bridge requires the additive SIM-866 startup snapshot/event API; it does
 not duplicate that ticket's directory or fallback policy.
 

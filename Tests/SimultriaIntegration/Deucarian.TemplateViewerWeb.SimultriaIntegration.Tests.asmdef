@@ -14,11 +14,15 @@
   "overrideReferences": true,
   "precompiledReferences": ["nunit.framework.dll"],
   "autoReferenced": false,
-  "defineConstraints": ["UNITY_INCLUDE_TESTS", "DEUCARIAN_SIMULTRIA_STARTUP_STATUS"],
+  "defineConstraints": ["UNITY_INCLUDE_TESTS", "DEUCARIAN_SIMULTRIA_STARTUP_STATUS", "DEUCARIAN_SIMULTRIA_STARTUP_API"],
   "versionDefines": [{
     "name": "com.deucarian.simultria-viewer-integration",
     "expression": "1.2.1",
     "define": "DEUCARIAN_SIMULTRIA_STARTUP_STATUS"
+  }, {
+    "name": "com.deucarian.api",
+    "expression": "2.0.2",
+    "define": "DEUCARIAN_SIMULTRIA_STARTUP_API"
   }],
   "optionalUnityReferences": ["TestAssemblies"],
   "noEngineReferences": false
