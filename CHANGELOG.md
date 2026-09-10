@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.6.1] - 2026-09-08
+
+### Fixed
+
+- Attach the optional startup bridge during serialized cold-scene activation;
+  Unity's not-yet-loaded flag no longer causes a false terminal failure.
+- Retain explicit binding validation and expose only fixed local diagnostic
+  reasons; invalid scene wiring uses safe configuration-failure page copy.
+- Create the page lifecycle sink before parent-origin validation and reuse it
+  in the adapter, so early configuration failures reach the shared loader.
+- Update the browser catalog assertion to include the existing canonical
+  presentation aliases, retaining exact command-set and automatic-run checks.
+
+### Added
+
+- Optional explicitly wired Simultria connection-gate startup bridge for
+  resolving, safe failure, and build-profile-fallback status, with replay and
+  deterministic listener cleanup. It requires Connection 1.2.1 (SIM-866) and
+  does not choose routing, enable bootstraps, or publish application readiness.
+- Early status/connection bridge tests. Template Viewer minimum is now 0.3.2.
+- Genuine serialized PlayMode cold-scene regression with activation-time guard
+  observations and scene-unload cleanup, without API or viewer startup.
+
 ## [0.6.0] - 2026-09-02
 
 ### Added
