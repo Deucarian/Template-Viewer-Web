@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+- Remove the invalid meta file for Unity's ignored `Samples~` directory; sample files retain their own import metadata.
+
+- Align first-paint theming with Theming 1.7.0 and validate the Web adapter against the updated shared Viewer Template navigation composition.
+- Clarify that existing viewer scenes and product configuration are preserved when the shared packages update; imported samples are separate editable copies.
+
 ## [0.6.1] - 2026-09-08
 
 ### Fixed
