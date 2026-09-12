@@ -20,6 +20,8 @@ namespace Deucarian.TemplateViewerWeb.Tests
         [UnityTest]
         public IEnumerator ImportedSampleInitializesThroughItsConfiguredPlatformEndpoint()
         {
+            if (!Application.isBatchMode)
+                Assert.Ignore("Run this imported-scene integration check in an isolated batch-mode test project; interactive user scenes must remain untouched.");
             Assert.That(EditorSceneManager.GetSceneManagerSetup().Any(scene =>
                 UnityEngine.SceneManagement.SceneManager.GetSceneByPath(scene.path).isDirty), Is.False,
                 "Save open scenes before running the imported-scene integration test.");
