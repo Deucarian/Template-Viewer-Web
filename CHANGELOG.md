@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Verify the imported Web Viewer scene reaches Ready with its configured platform endpoint, shared theme, camera and three indexed elements.
+
 ## [Unreleased]
 
 - Remove the invalid meta file for Unity's ignored `Samples~` directory; sample files retain their own import metadata.
