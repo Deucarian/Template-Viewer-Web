@@ -30,6 +30,14 @@ players, so it does not become a desktop or XR runtime dependency.
 
 ## Quick start
 
+Update this adapter, Viewer Template and their shared dependencies together.
+The current viewer baseline uses Camera Navigation 0.3.0, Viewer Navigation
+0.2.0 and Theming 1.7.0. The adapter does not recreate their controls or editor
+previews. The navigation integration enables **Both** input backends; restart
+Unity if requested. Existing product scenes and settings remain project-owned.
+Previously imported sample scenes are independent copies, not live links to
+the package's `Samples~` folder.
+
 1. Import the **Web Viewer** sample and open `Scenes/WebViewer.unity`.
 2. Enter Play Mode. Local Editor commands use the same generic application as
    WebGL builds.
