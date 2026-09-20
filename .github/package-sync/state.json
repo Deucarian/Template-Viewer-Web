@@ -5,8 +5,8 @@
       "githubBaseline": "5ea937a59dbf625e48b4444a051fb13cbf611202"
     },
     "main": {
-      "bitbucketCommit": "26e48c68225147341a8ae9da60a49813407919ab",
-      "githubBaseline": "62022a9df3ebde37d2a801a9ae97467b404dab33"
+      "githubBaseline": "8675fe802c26891ac37f3019718c1ceee24de16f",
+      "bitbucketCommit": "33610cbe82680d842eb478e450bcf900b7257e02"
     }
   }
 }
