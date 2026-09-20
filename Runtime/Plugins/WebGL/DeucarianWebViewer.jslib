@@ -3,6 +3,8 @@ mergeInto(LibraryManager.library, {
     getViewerConfig: function () {
       return window.deucarianWebViewerConfig
         || window.DeucarianWebViewerConfig
+        || window.simultriaWebViewerConfig
+        || window.SimultriaWebViewerConfig
         || {};
     },
 
